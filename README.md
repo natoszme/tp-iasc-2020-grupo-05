@@ -60,26 +60,25 @@ En lugar de describir el dominio, vamos a presentarlo a través de algunos escen
 
 #### Escenario 1: Adjudicación Simple
 
-Un comprador A se registra en el sistema mediante un POST a /buyers, expresando así su interés por participar en subastas, indicando: 
-Un nombre lógico
-Su ip
-Los tags de su interés
-Otro comprador B se registra de igual forma en el sistema
-Un vendedor crea una subasta, mediante un POST a /bids con la siguiente información
-Tags
-Un precio base (que puede ser cero)
-La duración máxima de la subasta
-El JSON del artículo
-El sistema publica la subasta a todos los compradores (en este caso, a los compradores A y B). 
-Esta y las demás a partir de este punto deben realizarse contra endpoints HTTP a criterio del equipo. 
-El comprador A publica un precio X
-El sistema le notifica que su oferta fue aceptada
-los demás compradores (B en este caso) son notificados de un nuevo precio
-
-Al cumplirse el timeout, 	
-la subasta cierra,
-Se adjudica a A como el comprador, y se le notifica apropiadamente
-B es notificado de la finalización de la subasta y de que no le fue adjudicada
+* Un comprador A se registra en el sistema mediante un POST a /buyers, expresando así su interés por participar en subastas, indicando: 
+  * Un nombre lógico
+  * Su ip
+  * Los tags de su interés
+* Otro comprador B se registra de igual forma en el sistema
+* Un vendedor crea una subasta, mediante un POST a /bids con la siguiente información
+  * Tags
+  * Un precio base (que puede ser cero)
+  * La duración máxima de la subasta
+  * El JSON del artículo
+* El sistema publica la subasta a todos los compradores (en este caso, a los compradores A y B). 
+  * Esta y las demás a partir de este punto deben realizarse contra endpoints HTTP a criterio del equipo. 
+* El comprador A publica un precio X
+  * El sistema le notifica que su oferta fue aceptada
+  * Los demás compradores (B en este caso) son notificados de un nuevo precio
+* Al cumplirse el timeout:
+  * La subasta cierra,
+* Se adjudica a A como el comprador, y se le notifica apropiadamente
+* B es notificado de la finalización de la subasta y de que no le fue adjudicada
 
 #### Escenario 2: Adjudicación con Competencia
 
@@ -105,10 +104,10 @@ Con la subasta ya en progreso, el servidor abruptamente falla por un error de ha
 Esto significa que de alguna forma los clientes tienen que dejar de hablar con el servidor caído, para empezar a hablar con el nuevo servidor.   
 
 Vamos a considerar en el error kernel (es decir, los datos que no podemos perder) a:
-la existencia de la subasta y sus datos
-si empezó
-y si terminó, con qué precio y a quien se le adjudicó
-la mayor oferta aceptada hasta ahora dentro de la subasta
+* La existencia de la subasta y sus datos
+* Si empezó
+* Y si terminó, con qué precio y a quien se le adjudicó
+* La mayor oferta aceptada hasta ahora dentro de la subasta
 
 Cuando se produce una caída, se debería extender el plazo de la subasta en 5 segundos. 
 
