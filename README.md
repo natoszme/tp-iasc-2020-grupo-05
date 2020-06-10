@@ -16,30 +16,30 @@
 ### Contexto
 
 Queremos implementar un servicio HTTP de subastas automáticas, en el cual:
-Se publicarán artículos (los cuales se representarán mediante un documento JSON sin esquema) bajo una lista de tags;
-Se notificará a todos los potenciales compradores;
-Y los compradores podrán ofertar y eventualmente adquirir el producto. 
+* Se publicarán artículos (los cuales se representarán mediante un documento JSON sin esquema) bajo una lista de tags;
+* Se notificará a todos los potenciales compradores;
+* Y los compradores podrán ofertar y eventualmente adquirir el producto. 
 
 Es importante notar que el servicio no es el backend de una aplicación de venta de productos para usuarios finales (como MercadoLibre), sino un servicio independiente en el que los compradores serán programas cliente que ofertarán según decisiones automatizadas, de forma similar a los un ATS. La lógica de compra que implementarán estos clientes está fuera del alcance del proyecto. 
 
 En esta primera etapa vamos a construir una prueba de concepto de la arquitectura, con los siguientes requerimientos: 
-debe soportar acceso concurrente de múltiples usuarios;
-debe poder escalar horizontalmente de forma automática;
-debe ser tolerante a fallos tanto de red como de implementación;
-debe maximizar la disponibilidad de los datos y su velocidad de acceso;
-toda la operatoria del servicio debe ocurrir en memoria y no se debe nunca persistir a disco, por cuestiones legales y de performance. 
-es deseable que el despliegue se haga mediante contenedores Docker. 
+* Debe soportar acceso concurrente de múltiples usuarios;
+* Debe poder escalar horizontalmente de forma automática;
+* Debe ser tolerante a fallos tanto de red como de implementación;
+* Debe maximizar la disponibilidad de los datos y su velocidad de acceso;
+* Toda la operatoria del servicio debe ocurrir en memoria y no se debe nunca persistir a disco, por cuestiones legales y de performance (o quizás sólo porque el arquitecto de turno se encaprichó :P).
+* Es deseable que el despliegue se haga mediante contenedores Docker. 
 
 En esta primera no se tendrán en cuenta cuestiones de seguridad; se asumirá que todos los clientes y servidores están dentro de una red segura. 
 
 ### Las tecnologías
 
 Se podrá utilizar cualquier tecnología que aplique alguno de los siguientes conceptos vistos en la cursada:
-Paso de mensajes basado en actores
-Continuaciones explícitas (CPS)
-Promises
-Memoria transaccional
-Corrutinas
+* Paso de mensajes basado en actores
+* Continuaciones explícitas (CPS)
+* Promises
+* Memoria transaccional
+* Corrutinas
 
 Obviamente, lo más simple es basarse en Elixir/OTP, Haskell, o Node.js, que son las tecnologías principales que vimos en la materia. 
 
@@ -50,9 +50,9 @@ Otras opciones son tecnologías basadas en Scala/Akka, Go, Clojure y Rust, pero 
 Se deberá construir el sistema descrito, tanto el servidor como clientes de prueba. No es obligatoria la construcción de casos de prueba automatizados, pero constituye un gran plus. 
 
 Se evaluará que:
-El sistema cumpla con los requerimientos planteados
-Haga un uso adecuado de la tecnología y los conceptos explicados en la materia
-La arquitectura sea distribuida
+* El sistema cumpla con los requerimientos planteados
+* Haga un uso adecuado de la tecnología y los conceptos explicados en la materia
+* La arquitectura sea distribuida
 
 ### Escenarios 
 
