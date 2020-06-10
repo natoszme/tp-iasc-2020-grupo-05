@@ -1,2 +1,117 @@
-# 2020-group-05
-TP 1C 2020 Arquitecturas concurrentes: Subastas Automáticas
+# Subastas Automáticas
+## TP Grupal - IASC 1C2020
+
+1. [Contexto](#contexto)
+2. [Las tecnologías](#las-tecnologias)
+3. [Formato de entrega y evaluación](#formato-de-entrega-y-evaluacion)
+4. [Escenarios](#escenarios)
+  4.1. [Escenario 1: Adjudicación Simple](#adjudicacion-simple)
+  4.2. [Escenario 2: Adjudicación con Competencia](#adjudicacion-con-competencia)
+  4.3. [Escenario 3: Cancelación de la Subasta](#cancelacion-de-la-subasta)
+  4.4. [Escenario 4: Registración en tiempo real](#registracion-en-tiempo-real)
+  4.5. [Escenario 5: Subastas múltiples](#subastas-multiples)
+  4.6. [Escenario 6: Caída del servidor](#caida-del-servidor)
+  4.7. [Escenario 7: Falta de memoria en el servidor](#falta-de-memoria-en-el-servidor)
+
+### 1. Contexto
+
+Queremos implementar un servicio HTTP de subastas automáticas, en el cual:
+Se publicarán artículos (los cuales se representarán mediante un documento JSON sin esquema) bajo una lista de tags;
+Se notificará a todos los potenciales compradores;
+Y los compradores podrán ofertar y eventualmente adquirir el producto. 
+
+Es importante notar que el servicio no es el backend de una aplicación de venta de productos para usuarios finales (como MercadoLibre), sino un servicio independiente en el que los compradores serán programas cliente que ofertarán según decisiones automatizadas, de forma similar a los un ATS. La lógica de compra que implementarán estos clientes está fuera del alcance del proyecto. 
+
+En esta primera etapa vamos a construir una prueba de concepto de la arquitectura, con los siguientes requerimientos: 
+debe soportar acceso concurrente de múltiples usuarios;
+debe poder escalar horizontalmente de forma automática;
+debe ser tolerante a fallos tanto de red como de implementación;
+debe maximizar la disponibilidad de los datos y su velocidad de acceso;
+toda la operatoria del servicio debe ocurrir en memoria y no se debe nunca persistir a disco, por cuestiones legales y de performance. 
+es deseable que el despliegue se haga mediante contenedores Docker. 
+
+En esta primera no se tendrán en cuenta cuestiones de seguridad; se asumirá que todos los clientes y servidores están dentro de una red segura. 
+
+### 2. Las tecnologías
+
+Se podrá utilizar cualquier tecnología que aplique alguno de los siguientes conceptos vistos en la cursada:
+Paso de mensajes basado en actores
+Continuaciones explícitas (CPS)
+Promises
+Memoria transaccional
+Corrutinas
+
+Obviamente, lo más simple es basarse en Elixir/OTP, Haskell, o Node.js, que son las tecnologías principales que vimos en la materia. 
+
+Otras opciones son tecnologías basadas en Scala/Akka, Go, Clojure y Rust, pero ahi te podremos dar menos soporte
+
+### 3. Formato de entrega y evaluación
+
+Se deberá construir el sistema descrito, tanto el servidor como clientes de prueba. No es obligatoria la construcción de casos de prueba automatizados, pero constituye un gran plus. 
+
+Se evaluará que:
+El sistema cumpla con los requerimientos planteados
+Haga un uso adecuado de la tecnología y los conceptos explicados en la materia
+La arquitectura sea distribuida
+
+### 4. Escenarios 
+
+En lugar de describir el dominio, vamos a presentarlo a través de algunos escenarios.
+
+#### 4.1 Escenario 1: Adjudicación Simple
+
+Un comprador A se registra en el sistema mediante un POST a /buyers, expresando así su interés por participar en subastas, indicando: 
+Un nombre lógico
+Su ip
+Los tags de su interés
+Otro comprador B se registra de igual forma en el sistema
+Un vendedor crea una subasta, mediante un POST a /bids con la siguiente información
+Tags
+Un precio base (que puede ser cero)
+La duración máxima de la subasta
+El JSON del artículo
+El sistema publica la subasta a todos los compradores (en este caso, a los compradores A y B). 
+Esta y las demás a partir de este punto deben realizarse contra endpoints HTTP a criterio del equipo. 
+El comprador A publica un precio X
+El sistema le notifica que su oferta fue aceptada
+los demás compradores (B en este caso) son notificados de un nuevo precio
+
+Al cumplirse el timeout, 	
+la subasta cierra,
+Se adjudica a A como el comprador, y se le notifica apropiadamente
+B es notificado de la finalización de la subasta y de que no le fue adjudicada
+
+#### 4.2 Escenario 2: Adjudicación con Competencia
+
+Similar al escenario anterior, pero antes de terminar la subasta, B oferta un precio mayor, y al cumplirse el plazo, se le adjudica a éste. 
+
+Obviamente, este proceso de superar la oferta anterior puede repetirse indefinidamente mientras la subasta esté abierta. 
+
+#### 4.3 Escenario 3: Cancelación de la Subasta
+
+Similar a los escenarios anteriores, pero el vendedor cancela la subasta antes de la expiración de la subasta y adjudicación del ganador. En este caso, obviamente, nadie gana la subasta, y todos los compradores son notificados.
+
+#### 4.4 Escenario 4: Registración en tiempo real
+
+Similar a los escenarios anteriores, pero un tercer participante, C, se registra después de que la subasta inició y antes de que termine. C podrá hacer ofertas y ganar la subasta como cualquier otro participante (A y B, en este caso)
+
+#### 4.5 Escenario 5: Subastas múltiples
+
+Mientras una subasta está en progreso, un vendedor (que puede ser el mismo de la anterior u otro) crea una nueva subasta, y las dos subastas estarán en progreso en simultáneo, funcionando cada una de ellas como siempre.  
+
+#### 4.6 Escenario 6: Caída del servidor
+
+Con la subasta ya en progreso, el servidor abruptamente falla por un error de hardware. En no más de 5 segundos un segundo servidor debe levantarse y continuar con la subasta. 
+Esto significa que de alguna forma los clientes tienen que dejar de hablar con el servidor caído, para empezar a hablar con el nuevo servidor.   
+
+Vamos a considerar en el error kernel (es decir, los datos que no podemos perder) a:
+la existencia de la subasta y sus datos
+si empezó
+y si terminó, con qué precio y a quien se le adjudicó
+la mayor oferta aceptada hasta ahora dentro de la subasta
+
+Cuando se produce una caída, se debería extender el plazo de la subasta en 5 segundos. 
+
+#### 4.7 Escenario 7: Falta de memoria en el servidor
+
+Si al registrar una subasta, el servidor detecta que no entrará en la memoria, esta debe ser transferida al primer servidor con memoria suficiente para contenerla. Aunque es deseable que este proceso se transparente para los vendedores y vendedores, no es esencial en esta etapa.
