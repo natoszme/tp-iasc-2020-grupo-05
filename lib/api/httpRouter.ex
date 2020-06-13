@@ -9,11 +9,8 @@ defmodule Http.Router do
 
 	plug(:dispatch)
 
-
-  # Simple GET Request handler for path /hello
-  get "/hello" do
-      send_resp(conn, 200, "world")
-  end
+  forward "/bids", to: Bids.Router
+  forward "/buyers", to: Buyers.Router
 
 	# Basic example to handle POST requests wiht a JSON body
 	post "/post" do
