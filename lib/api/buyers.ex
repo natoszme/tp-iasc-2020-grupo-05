@@ -8,8 +8,8 @@ defmodule Buyers.Router do
 
 
   # Simple GET Request handler for path /hello
-  get "/" do
-      send_resp(conn, 200, "buyers")
+  post "/" do
+      send_resp(conn, 200, "created buyer")
   end
 
   # "Default" route that will get called when no other route is matched

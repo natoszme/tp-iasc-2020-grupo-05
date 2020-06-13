@@ -11,6 +11,10 @@ defmodule AutomaticAuctions.Supervisor do
   end
 
   def children() do
-	[ Plug.Adapters.Cowboy.child_spec(scheme: :http, plug: Http.Router, options: [port: 9001]) ]
+	[ httpRouter() ]
+  end
+
+  def httpRouter() do
+    Plug.Adapters.Cowboy.child_spec(scheme: :http, plug: Http.Router, options: [port: 9001])
   end
 end

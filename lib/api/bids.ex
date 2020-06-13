@@ -7,9 +7,16 @@ defmodule Bids.Router do
   plug(:dispatch)
 
 
-  # Simple GET Request handler for path /hello
-  get "/" do
-      send_resp(conn, 200, "bids")
+  post "/" do
+      send_resp(conn, 200, "created bid")
+  end
+
+  post "/:id/offer" do
+      send_resp(conn, 200, "created offer for bid #{id}")
+  end
+
+  post "/:id/cancel" do
+      send_resp(conn, 200, "cancelled bid #{id}")
   end
 
   # "Default" route that will get called when no other route is matched
