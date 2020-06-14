@@ -7,7 +7,6 @@ defmodule Buyers.Router do
   plug(:dispatch)
 
 
-  # Simple GET Request handler for path /hello
   post "/" do
       send_resp(conn, 200, "created buyer")
   end
