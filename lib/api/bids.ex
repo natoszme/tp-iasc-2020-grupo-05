@@ -6,9 +6,11 @@ defmodule Bids.Router do
 
   plug(:dispatch)
 
-
   post "/" do
-      send_resp(conn, 200, "created bid")
+    body = conn.body_params
+    GenServer.start_link(Auction, body)
+
+    send_resp(conn, 201, "created bid with tags #{body.tags}")
   end
 
   post "/:id/offer" do
