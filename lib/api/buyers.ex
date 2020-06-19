@@ -7,8 +7,9 @@ defmodule Buyers.Router do
   plug(:dispatch)
 
   post "/" do
-      GenServer.start_link(Buyer, conn.body_params)
-      send_resp(conn, 200, "created buyer")
+      buyerJson = conn.body_params
+      Buyer.Supervisor.createBuyer(buyerJson)
+      send_resp(conn, 200, "created buyer #{buyerJson.name}")
   end
 
   # "Default" route that will get called when no other route is matched
