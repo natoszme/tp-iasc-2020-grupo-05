@@ -7,6 +7,8 @@ defmodule Http.Router do
 
 	plug(:match)
 
+  plug(Plug.Parsers, parsers: [:json], json_decoder: {Poison, :decode!, [[keys: :atoms]]})
+
 	plug(:dispatch)
 
   forward "/bids", to: Bids.Router
@@ -15,13 +17,13 @@ defmodule Http.Router do
 	# Basic example to handle POST requests wiht a JSON body
 	post "/post" do
 
-  	{:ok, body, conn} = read_body(conn)
+  	#{:ok, body, conn} = read_body(conn)
+    IO.inspect conn.body_params
+  	#body = Poison.decode!(body)
 
-  	body = Poison.decode!(body)
+  	#IO.inspect(body)
 
-  	IO.inspect(body)
-
-  	send_resp(conn, 201, "created: #{get_in(body, ["message"])}")
+  	send_resp(conn, 201, "created: #{conn.body_params.name}")
 
 	end
 

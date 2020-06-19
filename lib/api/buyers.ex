@@ -4,10 +4,7 @@ defmodule Buyers.Router do
 
   plug(:match)
 
-  plug(Plug.Parsers, parsers: [:json], json_decoder: Poison)
-
   plug(:dispatch)
-
 
   post "/" do
       GenServer.start_link(Buyer, conn.body_params)
