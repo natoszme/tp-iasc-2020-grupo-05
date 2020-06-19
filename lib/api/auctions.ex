@@ -7,10 +7,10 @@ defmodule Bids.Router do
   plug(:dispatch)
 
   post "/" do
-    body = conn.body_params
-    GenServer.start_link(Auction, body)
+    auctionJson = conn.body_params
+    Auction.Supervisor.createAuction(auctionJson)
 
-    send_resp(conn, 201, "created bid with tags #{body.tags}")
+    send_resp(conn, 201, "created bid with tags #{auctionJson.tags}")
   end
 
   post "/:id/offer" do
