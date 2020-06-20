@@ -14,6 +14,7 @@ defmodule Buyer.Supervisor do
     DynamicSupervisor.start_child(Buyer.Supervisor, {Buyer, buyerJson})
   end
 
+  #TODO may have a registry with {ip, buyer} in order to avoid notifying the offerer
   def interestedIn(tags) do
     childs = DynamicSupervisor.which_children(Buyer.Supervisor)
     Enum.filter(childs, &(childInterestedIn?(&1, tags)))
