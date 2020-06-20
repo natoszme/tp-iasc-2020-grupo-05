@@ -10,6 +10,13 @@ defmodule Buyer do
     {:ok, state}
   end
 
+  def handle_call({:interested?, tags}, _sender, state) do
+    IO.puts("about to check if interested in tags")
+    IO.inspect tags
+
+    {:ok, true}
+  end
+
   # def handle_cast({:parse_and_download}, {line, target_directory}) do
   #   regexp = ~r/http(s?)\:.*?\.(png|jpg|gif)/
   #     Regex.scan(regexp, line)

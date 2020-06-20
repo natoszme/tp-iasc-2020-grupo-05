@@ -12,6 +12,13 @@ defmodule Auction do
     {:ok, state}
   end
 
+  #TODO look for the interested buyers (for now, using which_children of Buyer.Supervisor)
+  #TODO may be a cast
+  def handle_call({:create_offer, offerJson}, _sender, state) do
+    IO.inspect offerJson.price
+    {:reply, state, state}
+  end
+
   def handle_info(:timeout, state) do
     IO.puts("about to end auction")
 
