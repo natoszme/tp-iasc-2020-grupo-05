@@ -11,9 +11,7 @@ defmodule Buyer do
   end
 
   def handle_call({:interested?, auctionTags}, _sender, state) do
-    IO.puts("about to check if interested in tags")
     ownTags = state.tags
-    IO.inspect ownTags
     interested? = Enum.any?(auctionTags, &(hasTag?(&1, ownTags)))
     {:reply, interested?, state}
   end
@@ -22,9 +20,20 @@ defmodule Buyer do
     Enum.member?(ownTags, tag)
   end
 
-  def handle_cast({:offer, price}, state) do
-    #TODO request http to state.ip
-    IO.inspect "about to notify price: $#{price}"
+  #TODO extract in another actor?
+  def handle_cast({:offer, {id, price}}, state) do
+    ip = state.ip
+    json = Poison.encode!(%{price: price})
+    IO.inspect json
+    response = HTTPoison.post "#{ip}/#{id}/offers", json, [{"Content-Type", "application/json"}]
+    case response do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        IO.puts body
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        IO.inspect "notification failed: not found"
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.inspect "notification failed: #{reason}"
+    end
     {:noreply, state}
   end
 end

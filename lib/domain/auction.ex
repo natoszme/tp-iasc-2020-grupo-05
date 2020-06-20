@@ -12,18 +12,17 @@ defmodule Auction do
     {:ok, state}
   end
 
-  #TODO look for the interested buyers (for now, using which_children of Buyer.Supervisor)
   #TODO may be a cast
   def handle_call({:create_offer, offerJson}, _sender, state) do
-    price = offerJson.price
     interestedBuyers = Buyer.Supervisor.interestedIn(state.tags)
-    IO.inspect interestedBuyers
-    Enum.each(interestedBuyers, &(notifyOffer(&1, price)))
+    Enum.each(interestedBuyers, &(notifyOffer(&1, state, offerJson)))
     {:reply, state, state}
   end
 
-  def notifyOffer(buyer, price) do
-    GenServer.cast(buyer, {:offer, price})
+  def notifyOffer(buyer, state, offerJson) do
+    id = state.id
+    price = offerJson.price
+    GenServer.cast(buyer, {:offer, {id, price}})
   end
 
   def handle_info(:timeout, state) do
