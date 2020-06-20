@@ -8,17 +8,21 @@ defmodule Bids.Router do
 
   post "/" do
     auctionJson = conn.body_params
-    Auction.Supervisor.createAuction(auctionJson)
+    id = Auction.Supervisor.createAuction(auctionJson)
 
-    send_resp(conn, 201, "created bid with tags #{auctionJson.tags}")
+    send_resp(conn, 200, "created auction #{id}")
   end
 
   post "/:id/offer" do
-      send_resp(conn, 200, "created offer for bid #{id}")
+      auction = GenServer.call(AuctionHome, {:auction_by_id, id})
+      case auction do
+        :none -> send_resp(conn, 404, "inexisting auction #{id}")
+        pid -> send_resp(conn, 200, "created offer for bid #{id}")
+      end
   end
 
   post "/:id/cancel" do
-      send_resp(conn, 200, "cancelled bid #{id}")
+      send_resp(conn, 200, "cancelled auction #{id}")
   end
 
   # "Default" route that will get called when no other route is matched

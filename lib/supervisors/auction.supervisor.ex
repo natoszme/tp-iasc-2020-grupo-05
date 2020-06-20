@@ -17,5 +17,6 @@ defmodule Auction.Supervisor do
     auctionJson = Map.put(auctionJson, :id, id)
     {:ok, auction} = DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
     Process.send_after(auction, :die, 2000)
+    id
   end
 end
