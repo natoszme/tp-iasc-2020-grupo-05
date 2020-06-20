@@ -7,6 +7,7 @@ defmodule Auction do
 
   def init(state) do
     IO.inspect state
+    Registry.register(AuctionRegistry, state.id, {})
     Process.send_after(self(), :timeout, timeToTimeout(state))
     {:ok, state}
   end
