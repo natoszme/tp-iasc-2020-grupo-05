@@ -10,11 +10,16 @@ defmodule Buyer do
     {:ok, state}
   end
 
-  def handle_call({:interested?, tags}, _sender, state) do
+  def handle_call({:interested?, auctionTags}, _sender, state) do
     IO.puts("about to check if interested in tags")
-    IO.inspect tags
+    ownTags = state.tags
+    IO.inspect ownTags
+    interested? = Enum.any?(auctionTags, &(hasTag?(&1, ownTags)))
+    {:reply, interested?, state}
+  end
 
-    {:ok, true}
+  def hasTag?(tag, ownTags) do
+    Enum.member?(ownTags, tag)
   end
 
   # def handle_cast({:parse_and_download}, {line, target_directory}) do

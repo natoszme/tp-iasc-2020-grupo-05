@@ -16,6 +16,8 @@ defmodule Auction do
   #TODO may be a cast
   def handle_call({:create_offer, offerJson}, _sender, state) do
     IO.inspect offerJson.price
+    interestedBuyers = Buyer.Supervisor.interestedIn(state.tags)
+    IO.inspect interestedBuyers
     {:reply, state, state}
   end
 
