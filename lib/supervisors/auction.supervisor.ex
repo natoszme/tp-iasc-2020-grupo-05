@@ -10,11 +10,13 @@ defmodule Auction.Supervisor do
     []
   end
 
+  #TODO muy acopaldo a la auction? porque necesitamos calcular estos valores la sólo primera vez
   def createAuction(auctionJson) do
     endTime = Time.add(Time.utc_now(), String.to_integer(auctionJson.timeout), :second)
     auctionJson = Map.put(auctionJson, :endTime, endTime)
     id = GenServer.call(IdGenerator, :next)
     auctionJson = Map.put(auctionJson, :id, id)
+    auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
     {:ok, auction} = DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
     Process.send_after(auction, :die, 2000)
     id
