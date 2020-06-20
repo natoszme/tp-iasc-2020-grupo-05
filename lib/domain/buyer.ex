@@ -20,12 +20,16 @@ defmodule Buyer do
     Enum.member?(ownTags, tag)
   end
 
-  #TODO extract in another actor?
   def handle_cast({:offer, {id, price}}, state) do
+    notifyClient(state, "offers", id, price)
+    {:noreply, state}
+  end
+
+  #TODO extract in another actor?
+  def notifyClient(state, resource, id, price) do
     ip = state.ip
     json = Poison.encode!(%{price: price})
-    IO.inspect json
-    response = HTTPoison.post "#{ip}/#{id}/offers", json, [{"Content-Type", "application/json"}]
+    response = HTTPoison.post "#{ip}/#{id}/#{resource}", json, [{"Content-Type", "application/json"}]
     case response do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         IO.puts body
@@ -34,6 +38,5 @@ defmodule Buyer do
       {:error, %HTTPoison.Error{reason: reason}} ->
         IO.inspect "notification failed: #{reason}"
     end
-    {:noreply, state}
   end
 end
