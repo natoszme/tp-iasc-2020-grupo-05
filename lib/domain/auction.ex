@@ -14,25 +14,22 @@ defmodule Auction do
 
   #TODO may be a cast
   def handle_call({:create_offer, offerJson}, _sender, state) do
-    interestedBuyers = Buyer.Supervisor.interestedIn(state.tags)
-    Enum.each(interestedBuyers, &(notifyOffer(&1, state, offerJson)))
+    notifyOffer(state, offerJson)
+    #TODO check if its better, otherwise same state
+    #state = Map.put(state, :best_offer, {buyerIp, offerJson.price})
     {:reply, state, state}
-  end
-
-  def notifyOffer(buyer, state, offerJson) do
-    id = state.id
-    price = offerJson.price
-    GenServer.cast(buyer, {:offer, {id, price}})
   end
 
   def handle_info(:timeout, state) do
     IO.puts("about to end auction")
 
-    Process.send_after(self(), :accident, 2000)
+    #TODO find the winner and the other interested buyers (remove the winner from interested ones)
+    #using the BuyerHome
 
     {:stop, :normal, state}
   end
 
+  #just for testing
   def handle_info(:die, _state) do
     IO.puts("about to die")
 
@@ -42,5 +39,19 @@ defmodule Auction do
   #TODO deconstruct map in param?
   def timeToTimeout(state) do
     Time.diff(state.endTime, Time.utc_now()) * 1000
+  end
+
+  def notifyOffer(state, offerJson) do
+    Enum.each(interestedBuyers(state), &(notifyBuyerOffer(&1, state, offerJson)))
+  end
+
+  def interestedBuyers(state) do
+    Buyer.Supervisor.interestedIn(state.tags)
+  end
+
+  def notifyBuyerOffer(buyer, state, offerJson) do
+    id = state.id
+    price = offerJson.price
+    GenServer.cast(buyer, {:offer, {id, price}})
   end
 end
