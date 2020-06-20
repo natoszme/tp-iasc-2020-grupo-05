@@ -52,8 +52,18 @@ defmodule Auction do
   def handle_info(:timeout, state) do
     IO.puts("about to end auction")
 
-    #TODO find the winner and the other interested buyers (remove the winner from interested ones)
-    #using the BuyerHome
+    #TODO handle that may not be best_offer
+    withoutPort = Enum.at(String.split(state.best_offer.ip, ":"), 0)
+    winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
+    IO.inspect winner
+
+    bestPrice = state.best_offer.price
+    GenServer.cast(winner, {:won, {state.id, bestPrice}})
+
+    #TODO reuse between this and offer notification
+    nonWinners = Buyer.Supervisor.interestedInBut(state.tags, winner)
+    #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
+    Enum.each(nonWinners, &(GenServer.cast(&1, {:lost, {state.id, bestPrice}})))
 
     {:stop, :normal, state}
   end
@@ -74,6 +84,7 @@ defmodule Auction do
     Enum.each(interestedBuyers(state), &(notifyBuyerOffer(&1, state, offerJson)))
   end
 
+  #TODO should get them from BuyerHome!
   def interestedBuyers(state) do
     Buyer.Supervisor.interestedIn(state.tags)
   end

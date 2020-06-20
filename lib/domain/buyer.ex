@@ -32,6 +32,16 @@ defmodule Buyer do
     {:noreply, state}
   end
 
+  def handle_cast({:won, {id, winnerPrice}}, state) do
+    notifyClient(state, "won", id, winnerPrice)
+    {:noreply, state}
+  end
+
+  def handle_cast({:lost, {id, winnerPrice}}, state) do
+    notifyClient(state, "lost", id, winnerPrice)
+    {:noreply, state}
+  end
+
   #TODO extract in another actor?
   def notifyClient(state, resource, id, price) do
     ip = state.ip

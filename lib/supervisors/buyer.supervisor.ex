@@ -14,11 +14,17 @@ defmodule Buyer.Supervisor do
     DynamicSupervisor.start_child(Buyer.Supervisor, {Buyer, buyerJson})
   end
 
-  #TODO may have a registry with {ip, buyer} in order to avoid notifying the offerer
+  #TODO should be moved to BuyerHome!
+  #TODO avoid notifying the offerer
   def interestedIn(tags) do
     childs = DynamicSupervisor.which_children(Buyer.Supervisor)
     Enum.filter(childs, &(childInterestedIn?(&1, tags)))
       |> Enum.map(&(elem(&1, 1)))
+  end
+
+  def interestedInBut(tags, buyer) do
+    interestedBuyers = interestedIn(tags)
+    Enum.filter(interestedBuyers, &(&1 != buyer))
   end
 
   def childInterestedIn?(fullChild, tags) do
