@@ -11,7 +11,7 @@ defmodule AutomaticAuctions.Supervisor do
   end
 
   def children() do
-	[ httpRouter(), Auction.Supervisor, Buyer.Supervisor ]
+	[ httpRouter(), Auction.Supervisor, Buyer.Supervisor, IdGenerator ]
   end
 
   def httpRouter() do
