@@ -14,8 +14,7 @@ defmodule Bids.Router do
     send_resp(conn, 200, "created auction #{id}")
   end
 
-  #TODO necesitamos identificar el buyer a partir de la ip para notificar a todos menos ese!
-  #necesitamos un actor handler para este post porque no queremos tener toda la logica en el controller
+  #TODO necesitamos un actor handler para este post porque no queremos tener toda la logica en el controller
   post "/:id/offer" do
       auction = GenServer.call(AuctionHome, {:auction_by_id, id})
       offerJson = conn.body_params
@@ -28,7 +27,9 @@ defmodule Bids.Router do
 
   #TODO mejorar esto (parametros)
   def createOffer(conn, id, auction, offerJson) do
-    GenServer.call(auction, {:create_offer, offerJson})
+    senderIp = to_string(:inet_parse.ntoa(conn.remote_ip))
+    buyer = GenServer.call(BuyerHome, {:buyer_by_ip, senderIp})
+    GenServer.cast(auction, {:create_offer, buyer, offerJson})
     send_resp(conn, 200, "created offer for bid #{id}")
   end
 

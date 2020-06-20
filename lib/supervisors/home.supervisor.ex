@@ -11,6 +11,6 @@ defmodule Home.Supervisor do
   end
 
   def children() do
-    [ AuctionHome ]
+    [ AuctionHome, BuyerHome ]
   end
 end

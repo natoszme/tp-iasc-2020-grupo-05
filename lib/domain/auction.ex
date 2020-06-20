@@ -5,6 +5,7 @@ defmodule Auction do
     GenServer.start_link(__MODULE__, state)
   end
 
+  #TODO needs an agent for keeping (id, offers)
   def init(state) do
     IO.inspect state
     Registry.register(AuctionRegistry, state.id, {})
@@ -12,12 +13,40 @@ defmodule Auction do
     {:ok, state}
   end
 
-  #TODO may be a cast
-  def handle_call({:create_offer, offerJson}, _sender, state) do
+  def handle_cast({:create_offer, buyer, offerJson}, state) do
+    #TODO notify only if its better
     notifyOffer(state, offerJson)
-    #TODO check if its better, otherwise same state
-    #state = Map.put(state, :best_offer, {buyerIp, offerJson.price})
-    {:reply, state, state}
+
+    price = offerJson.price
+    betterPrice = betterOrSamePrice(state, price)    
+    
+    buyerIp = GenServer.call(buyer, :ip)
+    state = Map.put(state, :best_offer, %{ip: buyerIp, price: betterPrice})
+    IO.inspect state
+    {:noreply, state}
+  end
+
+  #TODO improve this crappy model
+  def betterOrSamePrice(state, price) do
+    cond do
+      !state[:best_offer] ->
+        IO.inspect "no best_offer"
+        cond do
+          price > state.basePrice ->
+            IO.inspect "first price is better than basePrice"
+            price
+          true -> state.basePrice
+        end
+      true ->
+        IO.inspect price
+        IO.inspect state.best_offer.price
+        cond do
+          price > state.best_offer.price ->
+            IO.inspect "new best offer"
+            price
+          true -> state.best_offer.price
+      end
+    end
   end
 
   def handle_info(:timeout, state) do

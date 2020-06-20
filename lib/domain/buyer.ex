@@ -7,6 +7,9 @@ defmodule Buyer do
 
   def init(state) do
     IO.inspect state
+    #TODO need to change registry to duplicate keys?
+    withoutPort = Enum.at(String.split(state.ip, ":"), 0)
+    Registry.register(BuyerRegistry, withoutPort, {})
     {:ok, state}
   end
 
@@ -14,6 +17,10 @@ defmodule Buyer do
     ownTags = state.tags
     interested? = Enum.any?(auctionTags, &(hasTag?(&1, ownTags)))
     {:reply, interested?, state}
+  end
+
+  def handle_call(:ip, _sender, state) do
+    {:reply, state.ip, state}
   end
 
   def hasTag?(tag, ownTags) do
