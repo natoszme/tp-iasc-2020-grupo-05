@@ -13,12 +13,11 @@ defmodule Auction do
     {:ok, state}
   end
 
-  #TODO avoid notificating this buyer
   def handle_cast({:create_offer, buyer, %{price: newPrice}}, state) do
     IO.inspect "received offer with price #{newPrice}"
     actualPrice = case actualPrice(state, newPrice) do
       {:better, betterPrice} ->
-        notifyOffer(state, newPrice)
+        notifyOffer(state, buyer, newPrice)
         betterPrice
       {_, actualPrice} ->
         actualPrice
@@ -87,13 +86,17 @@ defmodule Auction do
 
   #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
   def notifyLosers(state, winner) do
-    %{tags: tags, best_offer: %{price: bestPrice}} = state
-    nonWinners = Buyer.Supervisor.interestedInBut(tags, winner)
-    Enum.each(nonWinners, &(notifyBuyer(state, &1, :lost, bestPrice)))
+    %{best_offer: %{price: bestPrice}} = state
+    notifyInterestedBut(state, winner, :lost, bestPrice)
   end
 
-  def notifyOffer(state, newPrice) do
-    Enum.each(interestedBuyers(state), &(notifyBuyer(state, &1, :offer, newPrice)))
+  def notifyOffer(state, offerer, newPrice) do
+    notifyInterestedBut(state, offerer, :offer, newPrice)
+  end
+
+  def notifyInterestedBut(state, buyer, message, price) do
+    allButOneBuyer = Buyer.Supervisor.interestedInBut(state.tags, buyer)
+    Enum.each(allButOneBuyer, &(notifyBuyer(state, &1, message, price)))
   end
 
   #TODO should get them from BuyerHome!

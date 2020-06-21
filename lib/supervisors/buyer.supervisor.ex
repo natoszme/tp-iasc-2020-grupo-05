@@ -15,7 +15,6 @@ defmodule Buyer.Supervisor do
   end
 
   #TODO should be moved to BuyerHome!
-  #TODO avoid notifying the offerer
   def interestedIn(tags) do
     childs = DynamicSupervisor.which_children(Buyer.Supervisor)
     Enum.filter(childs, &(childInterestedIn?(&1, tags)))
