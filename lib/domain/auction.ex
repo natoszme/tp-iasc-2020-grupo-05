@@ -13,11 +13,10 @@ defmodule Auction do
     {:ok, state}
   end
 
-  def handle_cast({:create_offer, buyer, offerJson}, state) do
-    newPrice = offerJson.price
+  def handle_cast({:create_offer, buyer, %{price: newPrice}}, state) do
     actualPrice = case actualPrice(state, newPrice) do
       {:better, betterPrice} ->
-        notifyOffer(state, offerJson)
+        notifyOffer(state, newPrice)
         betterPrice
       {_, actualPrice} ->
         actualPrice
@@ -29,38 +28,12 @@ defmodule Auction do
     {:noreply, state}
   end
 
-  #TODO improve this crappy model
-  def actualPrice(%{best_offer: %{price: bestPrice}}, newPrice) do
-    _actualPrice(newPrice, bestPrice)
-  end
-
-  def actualPrice(%{basePrice: basePrice}, newPrice) do
-    _actualPrice(newPrice, basePrice)
-  end
-
-  def _actualPrice(newPrice, actualPrice) do
-    cond do
-      newPrice > actualPrice ->
-        {:better, newPrice}
-      true ->
-        {:worse, actualPrice}
-    end
-  end
-
   def handle_info(:timeout, state) do
     IO.puts("about to end auction")
-    if state[:best_offer] do
-      withoutPort = Enum.at(String.split(state.best_offer.ip, ":"), 0)
-      winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
-      IO.inspect winner
 
-      bestPrice = state.best_offer.price
-      GenServer.cast(winner, {:won, {state.id, bestPrice}})
-
-      #TODO reuse between this and offer notification
-      nonWinners = Buyer.Supervisor.interestedInBut(state.tags, winner)
-      #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
-      Enum.each(nonWinners, &(GenServer.cast(&1, {:lost, {state.id, bestPrice}})))
+    case state do
+      %{best_offer: _} -> notifyWinner(state)
+      _ -> nil
     end
 
     {:stop, :normal, state}
@@ -73,13 +46,42 @@ defmodule Auction do
     {:stop, :dead}
   end
 
+  def actualPrice(state, newPrice) do
+    case state do
+      %{best_offer: %{price: bestPrice}} -> _actualPrice(newPrice, bestPrice)
+      %{basePrice: basePrice} -> _actualPrice(newPrice, basePrice)
+    end    
+  end
+
+  def _actualPrice(newPrice, actualPrice) do
+    cond do
+      newPrice > actualPrice ->
+        {:better, newPrice}
+      true ->
+        {:worse, actualPrice}
+    end
+  end
+
+  def notifyWinner(%{id: id, tags: tags, best_offer: %{price: bestPrice, ip: ip}}) do
+    withoutPort = Enum.at(String.split(ip, ":"), 0)
+    winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
+    IO.inspect winner
+
+    GenServer.cast(winner, {:won, {id, bestPrice}})
+
+    #TODO reuse between this and offer notification
+    nonWinners = Buyer.Supervisor.interestedInBut(tags, winner)
+    #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
+    Enum.each(nonWinners, &(GenServer.cast(&1, {:lost, {id, bestPrice}})))
+  end
+
   #TODO deconstruct map in param?
   def timeToTimeout(state) do
     Time.diff(state.endTime, Time.utc_now()) * 1000
   end
 
-  def notifyOffer(state, offerJson) do
-    Enum.each(interestedBuyers(state), &(notifyBuyerOffer(&1, state, offerJson)))
+  def notifyOffer(state, newPrice) do
+    Enum.each(interestedBuyers(state), &(notifyBuyerOffer(&1, state, newPrice)))
   end
 
   #TODO should get them from BuyerHome!
@@ -87,9 +89,7 @@ defmodule Auction do
     Buyer.Supervisor.interestedIn(state.tags)
   end
 
-  def notifyBuyerOffer(buyer, state, offerJson) do
-    id = state.id
-    price = offerJson.price
-    GenServer.cast(buyer, {:offer, {id, price}})
+  def notifyBuyerOffer(buyer, %{id: id}, newPrice) do
+    GenServer.cast(buyer, {:offer, {id, newPrice}})
   end
 end
