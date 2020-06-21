@@ -44,8 +44,7 @@ defmodule Buyer do
   end
 
   #TODO extract in another actor?
-  def notifyClient(state, resource, id, price) do
-    ip = state.ip
+  def notifyClient(%{ip: ip}, resource, id, price) do
     IO.inspect "about to notify #{ip}/#{id}/#{resource} with price #{price}"
     json = Poison.encode!(%{price: price})
     response = HTTPoison.post "#{ip}/#{id}/#{resource}", json, [{"Content-Type", "application/json"}]

@@ -71,8 +71,8 @@ defmodule Auction do
   end
 
   #TODO deconstruct map in param?
-  def timeToTimeout(state) do
-    Time.diff(state.endTime, Time.utc_now()) * 1000
+  def timeToTimeout(%{endTime: endTime}) do
+    Time.diff(endTime, Time.utc_now()) * 1000
   end
 
   def notifyWinner(state) do
@@ -80,7 +80,6 @@ defmodule Auction do
     IO.inspect "the winner for #{state.id} is #{ip}"
     withoutPort = Enum.at(String.split(ip, ":"), 0)
     winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
-    #GenServer.cast(winner, {:won, {id, bestPrice}})
     notifyBuyer(state, winner, :won, bestPrice)
     winner
   end
