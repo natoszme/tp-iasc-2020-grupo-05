@@ -14,38 +14,36 @@ defmodule Auction do
   end
 
   def handle_cast({:create_offer, buyer, offerJson}, state) do
-    #TODO notify only if its better
-    notifyOffer(state, offerJson)
-
-    price = offerJson.price
-    betterPrice = betterOrSamePrice(state, price)    
+    newPrice = offerJson.price
+    actualPrice = case actualPrice(state, newPrice) do
+      {:better, betterPrice} ->
+        notifyOffer(state, offerJson)
+        betterPrice
+      {_, actualPrice} ->
+        actualPrice
+    end
     
     buyerIp = GenServer.call(buyer, :ip)
-    state = Map.put(state, :best_offer, %{ip: buyerIp, price: betterPrice})
+    state = Map.put(state, :best_offer, %{ip: buyerIp, price: actualPrice})
     IO.inspect state
     {:noreply, state}
   end
 
   #TODO improve this crappy model
-  def betterOrSamePrice(state, price) do
+  def actualPrice(%{best_offer: %{price: bestPrice}}, newPrice) do
+    _actualPrice(newPrice, bestPrice)
+  end
+
+  def actualPrice(%{basePrice: basePrice}, newPrice) do
+    _actualPrice(newPrice, basePrice)
+  end
+
+  def _actualPrice(newPrice, actualPrice) do
     cond do
-      !state[:best_offer] ->
-        IO.inspect "no best_offer"
-        cond do
-          price > state.basePrice ->
-            IO.inspect "first price is better than basePrice"
-            price
-          true -> state.basePrice
-        end
+      newPrice > actualPrice ->
+        {:better, newPrice}
       true ->
-        IO.inspect price
-        IO.inspect state.best_offer.price
-        cond do
-          price > state.best_offer.price ->
-            IO.inspect "new best offer"
-            price
-          true -> state.best_offer.price
-      end
+        {:worse, actualPrice}
     end
   end
 
