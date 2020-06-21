@@ -13,6 +13,7 @@ defmodule Auction do
     {:ok, state}
   end
 
+  #TODO avoid notificating this buyer
   def handle_cast({:create_offer, buyer, %{price: newPrice}}, state) do
     IO.inspect "received offer with price #{newPrice}"
     actualPrice = case actualPrice(state, newPrice) do
