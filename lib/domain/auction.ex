@@ -5,7 +5,7 @@ defmodule Auction do
     GenServer.start_link(__MODULE__, state)
   end
 
-  #TODO needs an agent for keeping (id, offers)
+  #TODO needs an agent for keeping (id, best_offer)
   def init(state) do
     IO.inspect state
     Registry.register(AuctionRegistry, state.id, {})
@@ -51,19 +51,19 @@ defmodule Auction do
 
   def handle_info(:timeout, state) do
     IO.puts("about to end auction")
+    if state[:best_offer] do
+      withoutPort = Enum.at(String.split(state.best_offer.ip, ":"), 0)
+      winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
+      IO.inspect winner
 
-    #TODO handle that may not be best_offer
-    withoutPort = Enum.at(String.split(state.best_offer.ip, ":"), 0)
-    winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
-    IO.inspect winner
+      bestPrice = state.best_offer.price
+      GenServer.cast(winner, {:won, {state.id, bestPrice}})
 
-    bestPrice = state.best_offer.price
-    GenServer.cast(winner, {:won, {state.id, bestPrice}})
-
-    #TODO reuse between this and offer notification
-    nonWinners = Buyer.Supervisor.interestedInBut(state.tags, winner)
-    #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
-    Enum.each(nonWinners, &(GenServer.cast(&1, {:lost, {state.id, bestPrice}})))
+      #TODO reuse between this and offer notification
+      nonWinners = Buyer.Supervisor.interestedInBut(state.tags, winner)
+      #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
+      Enum.each(nonWinners, &(GenServer.cast(&1, {:lost, {state.id, bestPrice}})))
+    end
 
     {:stop, :normal, state}
   end
