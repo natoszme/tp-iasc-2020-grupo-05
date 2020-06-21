@@ -14,6 +14,7 @@ defmodule Auction do
   end
 
   def handle_cast({:create_offer, buyer, %{price: newPrice}}, state) do
+    IO.inspect "received offer with price #{newPrice}"
     actualPrice = case actualPrice(state, newPrice) do
       {:better, betterPrice} ->
         notifyOffer(state, newPrice)
@@ -21,11 +22,8 @@ defmodule Auction do
       {_, actualPrice} ->
         actualPrice
     end
-    
-    buyerIp = GenServer.call(buyer, :ip)
-    state = Map.put(state, :best_offer, %{ip: buyerIp, price: actualPrice})
-    IO.inspect state
-    {:noreply, state}
+
+    {:noreply, stateWithUpdatedPrice(state, actualPrice, buyer)}
   end
 
   def handle_info(:timeout, state) do
@@ -60,6 +58,11 @@ defmodule Auction do
       true ->
         {:worse, actualPrice}
     end
+  end
+
+  def stateWithUpdatedPrice(state, actualPrice, buyer) do
+    buyerIp = GenServer.call(buyer, :ip)
+    Map.put(state, :best_offer, %{ip: buyerIp, price: actualPrice})
   end
 
   def notifyWinner(%{id: id, tags: tags, best_offer: %{price: bestPrice, ip: ip}}) do
