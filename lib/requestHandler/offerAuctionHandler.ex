@@ -10,6 +10,7 @@ defmodule OfferAuctionHandler do
     {:ok, state}
   end
 
+  #TODO should die after this call!
   def handle_call({:create, conn, id}, _sender, state) do
     auction = GenServer.call(AuctionHome, {:auction_by_id, id})
     offerJson = conn.body_params

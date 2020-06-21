@@ -9,7 +9,9 @@ defmodule Bids.Router do
   #TODO hacer todos los parseos en este controller
   post "/" do
     auctionJson = conn.body_params
-    id = Auction.Supervisor.createAuction(auctionJson)
+    {auction, id} = Auction.Supervisor.createAuction(auctionJson)
+
+    GenServer.cast(auction, {:created})
 
     send_resp(conn, 200, "created auction #{id}")
   end

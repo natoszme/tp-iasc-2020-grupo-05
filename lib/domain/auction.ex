@@ -13,6 +13,12 @@ defmodule Auction do
     {:ok, state}
   end
 
+  def handle_cast({:created}, state) do
+    IO.inspect "notifying creation of auction #{state.id}"
+    notifyAll(state)
+    {:noreply, state}
+  end
+
   def handle_cast({:create_offer, buyer, %{price: newPrice}}, state) do
     IO.inspect "received offer with price #{newPrice}"
     actualPrice = case actualPrice(state, newPrice) do
@@ -99,12 +105,19 @@ defmodule Auction do
     Enum.each(allButOneBuyer, &(notifyBuyer(state, &1, message, price)))
   end
 
+  def notifyAll(state) do
+    interestedBuyers = interestedBuyers(state)
+    Enum.each(interestedBuyers, &(notifyBuyer(state, &1, :new_auction)))
+  end
+
   #TODO should get them from BuyerHome!
   def interestedBuyers(state) do
     Buyer.Supervisor.interestedIn(state.tags)
   end
 
-  def notifyBuyer(%{id: id}, buyer, message, value) do
-    GenServer.cast(buyer, {message, {id, value}})
+  #TODO improve this default + if?
+  def notifyBuyer(%{id: id}, buyer, message, price \\ nil) do
+    notificationValue = if price, do: {id, price}, else: id
+    GenServer.cast(buyer, {message, notificationValue})
   end
 end
