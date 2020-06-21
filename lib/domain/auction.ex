@@ -30,7 +30,7 @@ defmodule Auction do
     IO.puts("about to end auction")
 
     case state do
-      %{best_offer: _} -> notifyWinner(state)
+      %{best_offer: _} -> notifyEnd(state)
       _ -> nil
     end
 
@@ -65,17 +65,9 @@ defmodule Auction do
     Map.put(state, :best_offer, %{ip: buyerIp, price: actualPrice})
   end
 
-  def notifyWinner(%{id: id, tags: tags, best_offer: %{price: bestPrice, ip: ip}}) do
-    withoutPort = Enum.at(String.split(ip, ":"), 0)
-    winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
-    IO.inspect winner
-
-    GenServer.cast(winner, {:won, {id, bestPrice}})
-
-    #TODO reuse between this and offer notification
-    nonWinners = Buyer.Supervisor.interestedInBut(tags, winner)
-    #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
-    Enum.each(nonWinners, &(GenServer.cast(&1, {:lost, {id, bestPrice}})))
+  def notifyEnd(state) do
+    winner = notifyWinner(state)
+    notifyLosers(state, winner)
   end
 
   #TODO deconstruct map in param?
@@ -83,8 +75,25 @@ defmodule Auction do
     Time.diff(state.endTime, Time.utc_now()) * 1000
   end
 
+  def notifyWinner(state) do
+    %{best_offer: %{price: bestPrice, ip: ip}} = state
+    IO.inspect "the winner for #{state.id} is #{ip}"
+    withoutPort = Enum.at(String.split(ip, ":"), 0)
+    winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
+    #GenServer.cast(winner, {:won, {id, bestPrice}})
+    notifyBuyer(state, winner, :won, bestPrice)
+    winner
+  end
+
+  #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
+  def notifyLosers(state, winner) do
+    %{tags: tags, best_offer: %{price: bestPrice}} = state
+    nonWinners = Buyer.Supervisor.interestedInBut(tags, winner)
+    Enum.each(nonWinners, &(notifyBuyer(state, &1, :lost, bestPrice)))
+  end
+
   def notifyOffer(state, newPrice) do
-    Enum.each(interestedBuyers(state), &(notifyBuyerOffer(&1, state, newPrice)))
+    Enum.each(interestedBuyers(state), &(notifyBuyer(state, &1, :offer, newPrice)))
   end
 
   #TODO should get them from BuyerHome!
@@ -92,7 +101,7 @@ defmodule Auction do
     Buyer.Supervisor.interestedIn(state.tags)
   end
 
-  def notifyBuyerOffer(buyer, %{id: id}, newPrice) do
-    GenServer.cast(buyer, {:offer, {id, newPrice}})
+  def notifyBuyer(%{id: id}, buyer, message, value) do
+    GenServer.cast(buyer, {message, {id, value}})
   end
 end

@@ -27,6 +27,7 @@ defmodule Buyer do
     Enum.member?(ownTags, tag)
   end
 
+  #TODO what if it receives the ip and knows if notify or not?!
   def handle_cast({:offer, {id, price}}, state) do
     notifyClient(state, "offers", id, price)
     {:noreply, state}
@@ -45,6 +46,7 @@ defmodule Buyer do
   #TODO extract in another actor?
   def notifyClient(state, resource, id, price) do
     ip = state.ip
+    IO.inspect "about to notify #{ip}/#{id}/#{resource} with price #{price}"
     json = Poison.encode!(%{price: price})
     response = HTTPoison.post "#{ip}/#{id}/#{resource}", json, [{"Content-Type", "application/json"}]
     case response do
