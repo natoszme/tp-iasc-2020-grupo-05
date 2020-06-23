@@ -50,6 +50,7 @@ defmodule Buyer do
 
   #TODO extract in another actor?
   def notifyClient(%{ip: ip}, resource, id, price \\ nil) do
+    #TODO do not show price in the log if absent
     IO.inspect "about to notify #{ip}/#{id}/#{resource} with price #{price}"
     json = if price, do: Poison.encode!(%{price: price}), else: Poison.encode!(%{})
     response = HTTPoison.post "#{ip}/#{id}/#{resource}", json, [{"Content-Type", "application/json"}]

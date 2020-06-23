@@ -21,15 +21,21 @@ defmodule Auction do
 
   def handle_cast({:create_offer, buyer, %{price: newPrice}}, state) do
     IO.inspect "received offer with price #{newPrice}"
+
+    buyerIp = GenServer.call(buyer, :ip)
+
     actualPrice = case actualPrice(state, newPrice) do
       {:better, betterPrice} ->
         notifyOffer(state, buyer, newPrice)
+        updateOffer(state, newPrice, buyerIp)
         betterPrice
       {_, actualPrice} ->
         actualPrice
     end
 
-    {:noreply, stateWithUpdatedPrice(state, actualPrice, buyer)}
+    updatedState = stateWithUpdatedPrice(state, actualPrice, buyerIp)
+
+    {:noreply, updatedState}
   end
 
   def handle_info(:timeout, state) do
@@ -66,8 +72,12 @@ defmodule Auction do
     end
   end
 
-  def stateWithUpdatedPrice(state, actualPrice, buyer) do
-    buyerIp = GenServer.call(buyer, :ip)
+  def updateOffer(%{id: id}, actualPrice, buyerIp) do
+    offer = %{price: actualPrice, buyer: buyerIp}
+    Auction.Agent.saveOffer(id, offer)
+  end
+
+  def stateWithUpdatedPrice(state, actualPrice, buyerIp) do
     Map.put(state, :best_offer, %{ip: buyerIp, price: actualPrice})
   end
 
@@ -81,6 +91,7 @@ defmodule Auction do
     Time.diff(endTime, Time.utc_now()) * 1000
   end
 
+  #TODO one solution if we cannot have the ip keys with port is to use BuyerHome to ask them all for the ip...
   def notifyWinner(state) do
     %{best_offer: %{price: bestPrice, ip: ip}} = state
     IO.inspect "the winner for #{state.id} is #{ip}"
