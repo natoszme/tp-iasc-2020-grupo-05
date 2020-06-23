@@ -6,7 +6,6 @@ defmodule Auction do
   end
 
   def init(state) do
-    IO.inspect state
     Registry.register(AuctionRegistry, state.id, {})
     Process.send_after(self(), :timeout, timeToTimeout(state))
 
@@ -14,6 +13,8 @@ defmodule Auction do
       :none -> state
       %{price: actualPrice, buyer: token} -> stateWithUpdatedPrice(state, actualPrice, token)
     end
+
+    IO.inspect state
 
     {:ok, state}
   end
@@ -115,7 +116,7 @@ defmodule Auction do
   end
 
   def notifyInterestedBut(state, buyer, message, price) do
-    allButOneBuyer = Buyer.Supervisor.interestedInBut(state.tags, buyer)
+    allButOneBuyer = BuyerHome.interestedInBut(state.tags, buyer)
     Enum.each(allButOneBuyer, &(notifyBuyer(state, &1, message, price)))
   end
 
@@ -125,9 +126,8 @@ defmodule Auction do
     Enum.each(interestedBuyers, &(notifyBuyer(state, &1, :new_auction)))
   end
 
-  #TODO should get them from BuyerHome!
   def interestedBuyers(state) do
-    Buyer.Supervisor.interestedIn(state.tags)
+    BuyerHome.interestedIn(state.tags)
   end
 
   #TODO improve this default + if?

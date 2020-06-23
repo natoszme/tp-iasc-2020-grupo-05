@@ -30,4 +30,20 @@ defmodule BuyerHome do
   def new(buyerJson) do
     GenServer.call(__MODULE__, {:create, buyerJson})
   end
+
+  def interestedIn(tags) do
+    childs = DynamicSupervisor.which_children(Buyer.Supervisor)
+    Enum.filter(childs, &(_childInterestedIn?(&1, tags)))
+      |> Enum.map(&(elem(&1, 1)))
+  end
+
+  def interestedInBut(tags, buyer) do
+    interestedBuyers = interestedIn(tags)
+    Enum.filter(interestedBuyers, &(&1 != buyer))
+  end
+
+  def _childInterestedIn?(fullChild, tags) do
+    child = elem(fullChild, 1)
+    GenServer.call(child, {:interested?, tags})
+  end
 end
