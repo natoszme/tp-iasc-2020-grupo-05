@@ -10,6 +10,11 @@ defmodule BuyerHome do
     {:ok, state}
   end
 
+  def handle_call({:create, buyerJson}, _sender, state) do
+    Buyer.Supervisor.createBuyer(buyerJson)
+    {:reply, buyerJson.ip, state}
+  end
+
   def handle_call({:buyer_by_ip, ip}, _sender, state) do
     buyerRegister = Registry.lookup(BuyerRegistry, ip) |> List.first
     result = case buyerRegister do
@@ -18,5 +23,9 @@ defmodule BuyerHome do
     end
 
     {:reply, result, state}
+  end
+
+  def new(buyerJson) do
+    GenServer.call(__MODULE__, {:create, buyerJson})
   end
 end

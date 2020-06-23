@@ -120,6 +120,7 @@ defmodule Auction do
     Enum.each(allButOneBuyer, &(notifyBuyer(state, &1, message, price)))
   end
 
+  #TODO rename for notifyNewAuction (or handle notifications better...)
   def notifyAll(state) do
     interestedBuyers = interestedBuyers(state)
     Enum.each(interestedBuyers, &(notifyBuyer(state, &1, :new_auction)))

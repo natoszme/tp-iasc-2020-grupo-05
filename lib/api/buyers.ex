@@ -8,7 +8,7 @@ defmodule Buyers.Router do
 
   post "/" do
       buyerJson = conn.body_params
-      Buyer.Supervisor.createBuyer(buyerJson)
+      BuyerHome.new(buyerJson)
       send_resp(conn, 200, "created buyer #{buyerJson.name}")
   end
 
