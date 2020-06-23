@@ -77,13 +77,15 @@ defmodule Auction do
   end
 
   def updateOffer(%{id: id}, actualPrice, token) do
-    offer = %{price: actualPrice, buyer: token}
-    Auction.Agent.saveOffer(id, offer)
+    Auction.Agent.saveOffer(id, _offer(token, actualPrice))
   end
 
-  #TODO method bestOffer to reuse between this and updateOffer
   def stateWithUpdatedPrice(state, actualPrice, token) do
-    Map.put(state, :best_offer, %{buyer: token, price: actualPrice})
+    Map.put(state, :best_offer, _offer(token, actualPrice))
+  end
+
+  def _offer(buyerToken, price) do
+    %{price: price, buyer: buyerToken}
   end
 
   def notifyEnd(state) do
@@ -95,7 +97,6 @@ defmodule Auction do
     Time.diff(endTime, Time.utc_now()) * 1000
   end
 
-  #TODO one solution if we cannot have the ip keys with port is to use BuyerHome to ask them all for the ip...
   def notifyWinner(state) do
     %{best_offer: %{price: bestPrice, buyer: token}} = state
     IO.inspect "the winner for #{state.id} is #{token}"
@@ -104,7 +105,6 @@ defmodule Auction do
     winner
   end
 
-  #TODO in order to test this properly, BuyerRegistry should distinguish ips by port!
   def notifyLosers(state, winner) do
     %{best_offer: %{price: bestPrice}} = state
     notifyInterestedBut(state, winner, :lost, bestPrice)
