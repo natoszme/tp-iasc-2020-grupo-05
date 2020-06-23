@@ -5,7 +5,6 @@ defmodule Auction.Agent do
     Agent.start_link(fn -> %{} end, name: __MODULE__)
   end
 
-  #TODO should be an actor to avoid race conditions?
   def saveOffer(auctionId, offer) do
     Agent.update(__MODULE__, &(_stateWithUpsertedAuction(&1, auctionId, offer)))
   end
@@ -19,9 +18,5 @@ defmodule Auction.Agent do
 
   def _stateWithUpsertedAuction(state, auctionId, offer) do
     Map.put(state, auctionId, offer)
-  end
-
-  def _auctionExists(state, auctionId) do
-    Map.has_key?(state, auctionId)
   end
 end

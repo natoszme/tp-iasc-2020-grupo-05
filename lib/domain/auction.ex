@@ -91,7 +91,6 @@ defmodule Auction do
     notifyLosers(state, winner)
   end
 
-  #TODO deconstruct map in param?
   def timeToTimeout(%{endTime: endTime}) do
     Time.diff(endTime, Time.utc_now()) * 1000
   end
