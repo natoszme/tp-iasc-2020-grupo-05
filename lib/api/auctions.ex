@@ -24,7 +24,14 @@ defmodule Bids.Router do
       end
   end
 
+  #TODO use CancelAuctionHandler
+  #TODO reuse between /offer and /cancel
   post "/:id/cancel" do
+      offerAuctionHandler = RequestHandler.Supervisor.new(OfferAuctionHandler)
+      case GenServer.call(offerAuctionHandler, {:cancel, id}) do
+        :ok -> send_resp(conn, 200, "cancelled auction #{id}")
+        _ -> send_resp(conn, 404, "inexisting auction ##{id}")
+      end
       send_resp(conn, 200, "cancelled auction #{id}")
   end
 

@@ -16,6 +16,10 @@ defmodule Auction.Agent do
     end
   end
 
+  def removeAuction(auctionId) do
+    Agent.update(__MODULE__, &(Map.delete(&1, auctionId)))
+  end
+
   def _stateWithUpsertedAuction(state, auctionId, offer) do
     Map.put(state, auctionId, offer)
   end

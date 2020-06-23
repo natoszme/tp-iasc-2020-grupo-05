@@ -18,7 +18,7 @@ defmodule Auction.Supervisor do
     auctionJson = Map.put(auctionJson, :id, id)
     auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
     {:ok, auction} = DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
-    Process.send_after(auction, :die, 1000)
+    Process.send_after(auction, :die, 2000)
     {auction, id}
   end
 end

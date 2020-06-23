@@ -30,6 +30,11 @@ defmodule Buyer do
     {:noreply, state}
   end
 
+  def handle_cast({:cancelled, id}, state) do
+    notifyClient(state, "cancelled", id)
+    {:noreply, state}
+  end
+
   #TODO what if it receives the ip and knows if notify or not?!
   def handle_cast({:offer, {id, price}}, state) do
     notifyClient(state, "offers", id, price)

@@ -19,9 +19,17 @@ defmodule Auction do
     {:ok, state}
   end
 
+  def terminate(:normal, %{id: id}) do
+    Auction.Agent.removeAuction(id)
+  end
+
+  def terminate({:bad_return_value, {:stop, :dead}}, _state) do
+    "i died :("
+  end
+
   def handle_cast({:created}, state) do
     IO.inspect "notifying creation of auction #{state.id}"
-    notifyAll(state)
+    notifyAll(state, :new_auction)
     {:noreply, state}
   end
 
@@ -41,6 +49,14 @@ defmodule Auction do
     updatedState = stateWithUpdatedPrice(state, actualPrice, token)
 
     {:noreply, updatedState}
+  end
+
+  def handle_cast({:cancel}, state) do
+    IO.inspect "about to cancel #{state.id}"
+
+    notifyAll(state, :cancelled)
+
+    {:stop, :normal, state}
   end
 
   def handle_info(:timeout, state) do
@@ -121,9 +137,9 @@ defmodule Auction do
   end
 
   #TODO rename for notifyNewAuction (or handle notifications better...)
-  def notifyAll(state) do
+  def notifyAll(state, message) do
     interestedBuyers = interestedBuyers(state)
-    Enum.each(interestedBuyers, &(notifyBuyer(state, &1, :new_auction)))
+    Enum.each(interestedBuyers, &(notifyBuyer(state, &1, message)))
   end
 
   def interestedBuyers(state) do
