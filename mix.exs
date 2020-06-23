@@ -15,7 +15,7 @@ defmodule AutomaticAuctions.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison, :plug_cowboy, :poison],
+    [applications: [:logger, :httpoison, :plug_cowboy, :poison, :secure_random],
      mod: {AutomaticAuctions, []}]
   end
 
@@ -31,6 +31,7 @@ defmodule AutomaticAuctions.Mixfile do
   defp deps do
     [{:httpoison, "~> 1.6"},
     {:poison, "~> 3.1"},
-    {:plug_cowboy, "~> 1.0"}]
+    {:plug_cowboy, "~> 1.0"},
+    {:secure_random, "~> 0.5.1"}]
   end
 end

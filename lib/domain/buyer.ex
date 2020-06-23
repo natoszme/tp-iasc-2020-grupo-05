@@ -7,9 +7,7 @@ defmodule Buyer do
 
   def init(state) do
     IO.inspect state
-    #TODO need to change registry to duplicate keys?
-    withoutPort = Enum.at(String.split(state.ip, ":"), 0)
-    Registry.register(BuyerRegistry, withoutPort, {})
+    Registry.register(BuyerRegistry, state.id, {})
     {:ok, state}
   end
 

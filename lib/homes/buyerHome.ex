@@ -11,8 +11,10 @@ defmodule BuyerHome do
   end
 
   def handle_call({:create, buyerJson}, _sender, state) do
+    id = SecureRandom.base64
+    buyerJson = Map.put(buyerJson, :id, id)
     Buyer.Supervisor.createBuyer(buyerJson)
-    {:reply, buyerJson.ip, state}
+    {:reply, id, state}
   end
 
   def handle_call({:buyer_by_ip, ip}, _sender, state) do

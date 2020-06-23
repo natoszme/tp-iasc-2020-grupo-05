@@ -8,8 +8,10 @@ defmodule Buyers.Router do
 
   post "/" do
       buyerJson = conn.body_params
-      BuyerHome.new(buyerJson)
-      send_resp(conn, 200, "created buyer #{buyerJson.name}")
+      id = BuyerHome.new(buyerJson)
+      IO.inspect "new buyer id: #{id}"
+      conn = Plug.Conn.put_resp_header(conn, "content-type", "application/json")
+      send_resp(conn, 200, Poison.encode!(%{id: id}))
   end
 
   match _ do

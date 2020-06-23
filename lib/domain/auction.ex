@@ -82,6 +82,7 @@ defmodule Auction do
     Auction.Agent.saveOffer(id, offer)
   end
 
+  #TODO method bestOffer to reuse between this and updateOffer
   def stateWithUpdatedPrice(state, actualPrice, buyerIp) do
     Map.put(state, :best_offer, %{ip: buyerIp, price: actualPrice})
   end
