@@ -5,11 +5,16 @@ defmodule Auction do
     GenServer.start_link(__MODULE__, state)
   end
 
-  #TODO needs an agent for keeping (id, best_offer)
   def init(state) do
     IO.inspect state
     Registry.register(AuctionRegistry, state.id, {})
     Process.send_after(self(), :timeout, timeToTimeout(state))
+
+    state = case Auction.Agent.bestOffer(state.id) do
+      :none -> state
+      %{price: actualPrice, buyer: buyerIp} -> stateWithUpdatedPrice(state, actualPrice, buyerIp)
+    end
+
     {:ok, state}
   end
 
