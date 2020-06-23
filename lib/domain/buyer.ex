@@ -7,7 +7,7 @@ defmodule Buyer do
 
   def init(state) do
     IO.inspect state
-    Registry.register(BuyerRegistry, state.id, {})
+    Registry.register(BuyerRegistry, state.token, {})
     {:ok, state}
   end
 

@@ -11,14 +11,14 @@ defmodule BuyerHome do
   end
 
   def handle_call({:create, buyerJson}, _sender, state) do
-    id = SecureRandom.base64
-    buyerJson = Map.put(buyerJson, :id, id)
+    token = SecureRandom.urlsafe_base64
+    buyerJson = Map.put(buyerJson, :token, token)
     Buyer.Supervisor.createBuyer(buyerJson)
-    {:reply, id, state}
+    {:reply, token, state}
   end
 
-  def handle_call({:buyer_by_ip, ip}, _sender, state) do
-    buyerRegister = Registry.lookup(BuyerRegistry, ip) |> List.first
+  def handle_call({:by_token, token}, _sender, state) do
+    buyerRegister = Registry.lookup(BuyerRegistry, token) |> List.first
     result = case buyerRegister do
       {buyer, _} -> buyer
       _ -> :none

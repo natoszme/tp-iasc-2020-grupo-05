@@ -29,9 +29,9 @@ defmodule OfferAuctionHandler do
 
   #TODO mejorar esto (parametros)
   def createOffer(conn, auction, offerJson) do
-    senderIp = to_string(:inet_parse.ntoa(conn.remote_ip))
+    token = conn.query_params["token"]
     #TODO validate that buyer exists
-    buyer = GenServer.call(BuyerHome, {:buyer_by_ip, senderIp})
-    GenServer.cast(auction, {:create_offer, buyer, offerJson})
+    buyer = GenServer.call(BuyerHome, {:by_token, token})
+    GenServer.cast(auction, {:create_offer, {buyer, token}, offerJson})
   end
 end

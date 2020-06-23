@@ -12,7 +12,7 @@ defmodule Auction do
 
     state = case Auction.Agent.bestOffer(state.id) do
       :none -> state
-      %{price: actualPrice, buyer: buyerIp} -> stateWithUpdatedPrice(state, actualPrice, buyerIp)
+      %{price: actualPrice, buyer: token} -> stateWithUpdatedPrice(state, actualPrice, token)
     end
 
     {:ok, state}
@@ -24,21 +24,20 @@ defmodule Auction do
     {:noreply, state}
   end
 
-  def handle_cast({:create_offer, buyer, %{price: newPrice}}, state) do
+  def handle_cast({:create_offer, {buyer, token}, %{price: newPrice}}, state) do
     IO.inspect "received offer with price #{newPrice}"
 
-    buyerIp = GenServer.call(buyer, :ip)
 
     actualPrice = case actualPrice(state, newPrice) do
       {:better, betterPrice} ->
         notifyOffer(state, buyer, newPrice)
-        updateOffer(state, newPrice, buyerIp)
+        updateOffer(state, newPrice, token)
         betterPrice
       {_, actualPrice} ->
         actualPrice
     end
 
-    updatedState = stateWithUpdatedPrice(state, actualPrice, buyerIp)
+    updatedState = stateWithUpdatedPrice(state, actualPrice, token)
 
     {:noreply, updatedState}
   end
@@ -77,14 +76,14 @@ defmodule Auction do
     end
   end
 
-  def updateOffer(%{id: id}, actualPrice, buyerIp) do
-    offer = %{price: actualPrice, buyer: buyerIp}
+  def updateOffer(%{id: id}, actualPrice, token) do
+    offer = %{price: actualPrice, buyer: token}
     Auction.Agent.saveOffer(id, offer)
   end
 
   #TODO method bestOffer to reuse between this and updateOffer
-  def stateWithUpdatedPrice(state, actualPrice, buyerIp) do
-    Map.put(state, :best_offer, %{ip: buyerIp, price: actualPrice})
+  def stateWithUpdatedPrice(state, actualPrice, token) do
+    Map.put(state, :best_offer, %{buyer: token, price: actualPrice})
   end
 
   def notifyEnd(state) do
@@ -98,10 +97,9 @@ defmodule Auction do
 
   #TODO one solution if we cannot have the ip keys with port is to use BuyerHome to ask them all for the ip...
   def notifyWinner(state) do
-    %{best_offer: %{price: bestPrice, ip: ip}} = state
-    IO.inspect "the winner for #{state.id} is #{ip}"
-    withoutPort = Enum.at(String.split(ip, ":"), 0)
-    winner = GenServer.call(BuyerHome, {:buyer_by_ip, withoutPort})
+    %{best_offer: %{price: bestPrice, buyer: token}} = state
+    IO.inspect "the winner for #{state.id} is #{token}"
+    winner = GenServer.call(BuyerHome, {:by_token, token})
     notifyBuyer(state, winner, :won, bestPrice)
     winner
   end
