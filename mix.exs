@@ -32,6 +32,7 @@ defmodule AutomaticAuctions.Mixfile do
     [{:httpoison, "~> 1.6"},
     {:poison, "~> 3.1"},
     {:plug_cowboy, "~> 1.0"},
-    {:secure_random, "~> 0.5.1"}]
+    {:secure_random, "~> 0.5.1"},
+    {:libcluster, "~> 3.2.1"}]
   end
 end

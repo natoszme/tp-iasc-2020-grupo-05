@@ -11,7 +11,7 @@ defmodule AutomaticAuctions.Supervisor do
   end
 
   def children(port) do
-    [ httpRouter(port), RequestHandler.Supervisor, Auction.Supervisor, Buyer.Supervisor,
+    [ httpRouter(port), clusterDefinition(), RequestHandler.Supervisor, Auction.Supervisor, Buyer.Supervisor,
       IdGenerator, Auction.Agent, Home.Supervisor ]
   end
 
@@ -19,5 +19,15 @@ defmodule AutomaticAuctions.Supervisor do
     router = Plug.Adapters.Cowboy.child_spec(scheme: :http, plug: Http.Router, options: [port: String.to_integer(port)])
     IO.inspect "Listening in port #{port}"
     router
+  end
+
+  def clusterDefinition do
+    topologies = [
+      automaticAuctions: [
+        strategy: Cluster.Strategy.Gossip
+      ]
+    ]
+
+    {Cluster.Supervisor, [topologies, [name: AutomaticAuctions.Cluster.Supervisor]]}
   end
 end
