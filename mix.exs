@@ -33,6 +33,7 @@ defmodule AutomaticAuctions.Mixfile do
     {:poison, "~> 3.1"},
     {:plug_cowboy, "~> 1.0"},
     {:secure_random, "~> 0.5.1"},
-    {:libcluster, "~> 3.2.1"}]
+    {:libcluster, "~> 3.2.1"},
+    {:horde, "~> 0.7.0"}]
   end
 end
