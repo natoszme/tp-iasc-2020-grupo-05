@@ -12,7 +12,7 @@ defmodule Auction.Supervisor do
 
   #TODO muy acopaldo a la auction? porque necesitamos calcular estos valores la sólo primera vez
   def createAuction(auctionJson) do
-    endTime = Time.add(Time.utc_now(), String.to_integer(auctionJson.timeout), :second)
+    endTime = DateTime.add(DateTime.utc_now(), String.to_integer(auctionJson.timeout), :second)
     auctionJson = Map.put(auctionJson, :endTime, endTime) |> Map.delete(:timeout)
     id = GenServer.call(IdGenerator, :next)
     auctionJson = Map.put(auctionJson, :id, id)

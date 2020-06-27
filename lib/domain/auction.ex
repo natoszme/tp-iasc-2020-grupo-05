@@ -111,7 +111,7 @@ defmodule Auction do
   end
 
   def timeToTimeout(%{endTime: endTime}) do
-    Time.diff(endTime, Time.utc_now()) * 1000
+    DateTime.diff(endTime, DateTime.utc_now()) * 1000
   end
 
   def notifyWinner(state) do
