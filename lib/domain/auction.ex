@@ -6,7 +6,7 @@ defmodule Auction do
   end
 
   def init(state) do
-    Horde.Registry.register(AuctionRegistry, state.id, {})
+    Horde.Registry.register(Auction.Registry, state.id, {})
     Process.send_after(self(), :timeout, timeToTimeout(state))
 
     state = case Auction.Agent.bestOffer(state.id) do

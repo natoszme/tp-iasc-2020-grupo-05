@@ -6,8 +6,8 @@ defmodule Auction.Supervisor do
     Horde.DynamicSupervisor.start_link(options)
   end
 
-  def init(:ok) do
-    []
+  def init(options) do
+    {:ok, Keyword.put(options, :members, get_members())}
   end
 
   #TODO muy acopaldo a la auction? porque necesitamos calcular estos valores la sólo primera vez
@@ -18,7 +18,13 @@ defmodule Auction.Supervisor do
     auctionJson = Map.put(auctionJson, :id, id)
     auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
     {:ok, auction} = Horde.DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
-    Process.send_after(auction, :die, 2000)
+    #this won't work when distributed since its only for local pids
+    #Process.send_after(auction, :die, 2000)
     {auction, id}
+  end
+
+  defp get_members() do
+    [Node.self() | Node.list()]
+      |> Enum.map(fn node -> {MyHordeSupervisor, node} end)
   end
 end
