@@ -18,10 +18,9 @@ defmodule OfferAuctionHandler do
     #TODO esto se puede mejorar?
     reply = case auction do
       :none ->
-        :error
+        {:error, "inexisting auction ##{id}"}
       pid ->
         createOffer(conn, pid, offerJson)
-        :ok
     end
 
     {:reply, reply, state}
@@ -47,9 +46,12 @@ defmodule OfferAuctionHandler do
   #TODO mejorar esto (parametros)
   def createOffer(conn, auction, offerJson) do
     token = conn.query_params["token"]
-    #TODO validate that buyer exists
-    buyer = GenServer.call(BuyerHome, {:by_token, token})
-    GenServer.cast(auction, {:create_offer, {buyer, token}, offerJson})
+    case GenServer.call(BuyerHome, {:by_token, token}) do
+      :none -> {:error, "inexisting buyer with token #{token}"}
+      buyer ->
+        GenServer.cast(auction, {:create_offer, {buyer, token}, offerJson})
+        {:ok}
+    end
   end
 
   #TODO mejorar esto (parametros)

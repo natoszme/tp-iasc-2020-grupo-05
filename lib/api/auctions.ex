@@ -19,8 +19,8 @@ defmodule Bids.Router do
   post "/:id/offer" do
       offerAuctionHandler = RequestHandler.Supervisor.new(OfferAuctionHandler)
       case GenServer.call(offerAuctionHandler, {:create, conn, id}) do
-        :ok -> send_resp(conn, 200, "created offer for auction ##{id}")
-        _ -> send_resp(conn, 404, "inexisting auction ##{id}")
+        {:ok} -> send_resp(conn, 200, "created offer for auction ##{id}")
+        {:error, message} -> send_resp(conn, 404, message)
       end
   end
 
