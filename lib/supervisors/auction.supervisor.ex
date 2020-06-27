@@ -1,9 +1,9 @@
 defmodule Auction.Supervisor do
-  use DynamicSupervisor
+  use Horde.DynamicSupervisor
 
   def start_link(_opts) do
     options = [ strategy: :one_for_one, name: Auction.Supervisor ]
-    DynamicSupervisor.start_link(options)
+    Horde.DynamicSupervisor.start_link(options)
   end
 
   def init(:ok) do
@@ -17,7 +17,7 @@ defmodule Auction.Supervisor do
     id = GenServer.call(IdGenerator, :next)
     auctionJson = Map.put(auctionJson, :id, id)
     auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
-    {:ok, auction} = DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
+    {:ok, auction} = Horde.DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
     Process.send_after(auction, :die, 2000)
     {auction, id}
   end

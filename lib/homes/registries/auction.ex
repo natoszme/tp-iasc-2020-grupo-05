@@ -16,6 +16,6 @@ defmodule AuctionRegistry do
 
   defp get_members() do
     [Node.self() | Node.list()]
-    |> Enum.map(fn node -> {AuctionRegistry, node} end)
+      |> Enum.map(fn node -> {AuctionRegistry, node} end)
   end
 end
