@@ -12,7 +12,7 @@ defmodule AutomaticAuctions.Supervisor do
 
   def children(port) do
     [ httpRouter(port), clusterDefinition(), RequestHandler.Supervisor, Auction.Supervisor, Buyer.Supervisor,
-      IdGenerator, Auction.Agent, Home.Supervisor ]
+      IdGenerator, Auction.Agent, Home.Supervisor, NodeListener ]
   end
 
   def httpRouter(port) do

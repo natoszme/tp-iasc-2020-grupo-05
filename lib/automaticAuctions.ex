@@ -10,7 +10,5 @@ defmodule AutomaticAuctions do
     end
 
     AutomaticAuctions.Supervisor.start_link(port)
-    #TODO the listener must be started with the AuctionSupervisor
-    Horde.DynamicSupervisor.start_child(Auction.Supervisor, NodeListener)
   end
 end
