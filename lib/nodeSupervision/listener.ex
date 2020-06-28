@@ -11,15 +11,20 @@ defmodule NodeListener do
   end
 
   def handle_info({:nodeup, _node, _node_type}, state) do
-    set_members(Auction.Supervisor)
-    set_members(Auction.Registry)
+    set_all_members()    
     {:noreply, state}
   end
 
   def handle_info({:nodedown, _node, _node_type}, state) do
+    set_all_members()    
+    {:noreply, state}
+  end
+
+  def set_all_members() do
     set_members(Auction.Supervisor)
     set_members(Auction.Registry)
-    {:noreply, state}
+    set_members(Buyer.Supervisor)
+    set_members(Buyer.Registry)
   end
 
   defp set_members(name) do

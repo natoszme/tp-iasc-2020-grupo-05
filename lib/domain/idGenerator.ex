@@ -1,4 +1,5 @@
 #TODO should be an agent
+#TODO should be global and supervised using horde
 defmodule IdGenerator do
   use GenServer
 
