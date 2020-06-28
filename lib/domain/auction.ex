@@ -94,7 +94,7 @@ defmodule Auction do
   end
 
   def updateOffer(%{id: id}, actualPrice, token) do
-    Auction.Agent.saveOffer(id, _offer(token, actualPrice))
+    Auction.Agent.saveAndSyncOffer(id, _offer(token, actualPrice))
   end
 
   def stateWithUpdatedPrice(state, actualPrice, token) do

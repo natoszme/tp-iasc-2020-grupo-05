@@ -35,23 +35,36 @@ defmodule NodeListener do
     :ok = Horde.Cluster.set_members(name, members)
   end
 
-  #TODO why do we need that, and why is it called twice?
-  def handle_info(_a, _b) do
-    IO.inspect "handlinginfo!"
-    {:noreply, []}
-  end
-
+  #TODO improve this crap
+  #TODO necessary since when the node is up, its AgentReplicator.Supervisor may have not started yet
   def sync_auction_agent do
     Process.sleep(2000)
     Node.list()
-      |> Enum.each(fn node -> sync_auction_with_node(node) end)
+      |> Enum.each(fn node -> sync_agent_with_node(node) end)
   end
 
-  def sync_auction_with_node(node) do
+  def sync_agent_with_node(node) do
     IO.inspect "about to sync Auction.Agent with #{node}"
     stateToSync = Auction.Agent.allState()
-    Task.Supervisor.async {AgentReplicator.Supervisor, node}, fn ->
+    task = Task.Supervisor.async {AgentReplicator.Supervisor, node}, fn ->
       Auction.Agent.syncState(stateToSync)
     end
+
+    Task.await(task)
+  end
+
+  def syncOffer(id, offer) do
+    Node.list()
+      |> Enum.each(fn node -> sync_auction_with_node(node, id, offer) end)
+  end
+
+  #TODO avoid repeating
+  def sync_auction_with_node(node, id, offer) do
+    IO.inspect "about to sync auction with #{node}"
+    task = Task.Supervisor.async {AgentReplicator.Supervisor, node}, fn ->
+      Auction.Agent.syncOffer({id, offer})
+    end
+
+    Task.await(task)
   end
 end

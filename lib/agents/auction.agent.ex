@@ -9,6 +9,11 @@ defmodule Auction.Agent do
     Agent.update(__MODULE__, &(_stateWithUpsertedAuction(&1, auctionId, offer)))
   end
 
+  def saveAndSyncOffer(auctionId, offer) do
+    saveOffer(auctionId, offer)
+    NodeListener.syncOffer(auctionId, offer)
+  end
+
   def bestOffer(auctionId) do
     case Agent.get(__MODULE__, &(Map.get(&1, auctionId))) do
       nil -> :none
@@ -32,7 +37,7 @@ defmodule Auction.Agent do
   end
 
   def syncOffer({id, offer}) do
-    IO.inspect offer
+    IO.inspect "about to update best offer for auction #{id}"
     saveOffer(id, offer)
   end
 
