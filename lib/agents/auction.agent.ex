@@ -16,8 +16,24 @@ defmodule Auction.Agent do
     end
   end
 
+  #TODO shouldn't be removed (as it's a domain restriction)
   def removeAuction(auctionId) do
     Agent.update(__MODULE__, &(Map.delete(&1, auctionId)))
+  end
+
+  def allState() do
+    Agent.get(__MODULE__, fn state -> state end)
+  end
+
+  def syncState(stateToSync) do
+    IO.inspect stateToSync
+    Map.to_list(stateToSync)
+      |> Enum.each(&(syncOffer(&1)))
+  end
+
+  def syncOffer({id, offer}) do
+    IO.inspect offer
+    saveOffer(id, offer)
   end
 
   def _stateWithUpsertedAuction(state, auctionId, offer) do
