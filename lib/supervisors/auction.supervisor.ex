@@ -17,9 +17,12 @@ defmodule Auction.Supervisor do
     id = GenServer.call(IdGenerator, :next)
     auctionJson = Map.put(auctionJson, :id, id)
     auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
+    auctionJson = Map.put(auctionJson, :originalNode, Node.self)
     {:ok, auction} = Horde.DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
     #this won't work when distributed since its only for local pids
     #Process.send_after(auction, :die, 2000)
+    IO.inspect "created auction on #{Node.self}"
+    IO.inspect auction
     {auction, id}
   end
 

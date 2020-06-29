@@ -7,6 +7,7 @@ defmodule Auction do
 
   def init(state) do
     Horde.Registry.register(Auction.Registry, state.id, {})
+    state = addTimeIfNeeded(state)
     Process.send_after(self(), :timeout, timeToTimeout(state))
 
     state = case Auction.Agent.bestOffer(state.id) do
@@ -150,5 +151,14 @@ defmodule Auction do
   def notifyBuyer(%{id: id}, buyer, message, price \\ nil) do
     notificationValue = if price, do: {id, price}, else: id
     GenServer.cast(buyer, {message, notificationValue})
+  end
+
+  def addTimeIfNeeded(state) do
+    %{originalNode: originalNode, endTime: endTime} = state
+    case originalNode != Node.self do
+      true -> %{state | endTime: DateTime.add(endTime, 5)}
+      _ -> state
+    end
+
   end
 end
