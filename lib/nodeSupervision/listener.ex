@@ -37,6 +37,7 @@ defmodule NodeListener do
 
   #TODO improve this crap
   #TODO necessary since when the node is up, its AgentReplicator.Supervisor may have not started yet
+  #TODO maybe delegatin in another actor that retries?
   def sync_auction_agent do
     Process.sleep(2000)
     Node.list()
