@@ -14,7 +14,7 @@ defmodule Auction.Supervisor do
   def createAuction(auctionJson) do
     endTime = DateTime.add(DateTime.utc_now(), String.to_integer(auctionJson.timeout), :second)
     auctionJson = Map.put(auctionJson, :endTime, endTime) |> Map.delete(:timeout)
-    id = GenServer.call(IdGenerator, :next)
+    id = GenServer.call({:global, IdGenerator}, :next)
     auctionJson = Map.put(auctionJson, :id, id)
     auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
     auctionJson = Map.put(auctionJson, :originalNode, Node.self)

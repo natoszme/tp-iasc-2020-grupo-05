@@ -4,7 +4,7 @@ defmodule IdGenerator do
   use GenServer
 
   def start_link(_opts) do
-    GenServer.start_link(__MODULE__, 0, name: IdGenerator)
+    Singleton.start_child(__MODULE__, 0, IdGenerator)
   end
 
   def init(state) do
