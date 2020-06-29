@@ -21,11 +21,6 @@ defmodule Auction.Agent do
     end
   end
 
-  #TODO shouldn't be removed (as it's a domain restriction)
-  def removeAuction(auctionId) do
-    Agent.update(__MODULE__, &(Map.delete(&1, auctionId)))
-  end
-
   def allState() do
     Agent.get(__MODULE__, fn state -> state end)
   end

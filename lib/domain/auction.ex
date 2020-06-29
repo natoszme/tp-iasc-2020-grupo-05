@@ -21,7 +21,7 @@ defmodule Auction do
   end
 
   def terminate(:normal, %{id: id}) do
-    Auction.Agent.removeAuction(id)
+    IO.inspect "auction #{id} ended"
   end
 
   def terminate({:bad_return_value, {:stop, :dead}}, _state) do
