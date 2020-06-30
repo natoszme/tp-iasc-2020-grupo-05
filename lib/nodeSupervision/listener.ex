@@ -13,6 +13,7 @@ defmodule NodeListener do
   def handle_info({:nodeup, _node, _node_type}, state) do
     set_all_members()
     sync_auction_agent()
+    sync_idGenerator_agent()
     {:noreply, state}
   end
 
@@ -44,6 +45,12 @@ defmodule NodeListener do
       |> Enum.each(fn node -> sync_agent_with_node(node) end)
   end
 
+  def sync_idGenerator_agent do
+    Process.sleep(2000)
+    Node.list()
+      |> Enum.each(fn node -> sync_idGenerator_with_node(node) end)
+  end
+
   def sync_agent_with_node(node) do
     IO.inspect "about to sync Auction.Agent with #{node}"
     stateToSync = Auction.Agent.allState()
@@ -54,9 +61,24 @@ defmodule NodeListener do
     Task.await(task)
   end
 
+  def sync_idGenerator_with_node(node) do
+    IO.inspect "about to sync IdGenerator.Agent with #{node}"
+    lastId = IdGenerator.Agent.last()
+    task = Task.Supervisor.async {AgentReplicator.Supervisor, node}, fn ->
+      IdGenerator.Agent.updateLastId(lastId)
+    end
+
+    Task.await(task)
+  end
+
   def syncOffer(id, offer) do
     Node.list()
       |> Enum.each(fn node -> sync_auction_with_node(node, id, offer) end)
+  end
+
+  def syncLastId(lastId) do
+    Node.list()
+      |> Enum.each(fn node -> sync_last_id_with_node(node, lastId) end)
   end
 
   #TODO avoid repeating
@@ -64,6 +86,15 @@ defmodule NodeListener do
     IO.inspect "about to sync auction with #{node}"
     task = Task.Supervisor.async {AgentReplicator.Supervisor, node}, fn ->
       Auction.Agent.syncOffer({id, offer})
+    end
+
+    Task.await(task)
+  end
+
+  def sync_last_id_with_node(node, lastId) do
+    IO.inspect "about to sync lastId with #{node}"
+    task = Task.Supervisor.async {AgentReplicator.Supervisor, node}, fn ->
+      IdGenerator.Agent.updateLastId(lastId)
     end
 
     Task.await(task)
