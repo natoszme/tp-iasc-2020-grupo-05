@@ -10,6 +10,7 @@ defmodule NodeListener do
     {:ok, nil}
   end
 
+  #TODO this can be improved to only add the new node
   def handle_info({:nodeup, _node, _node_type}, state) do
     set_all_members()
     sync_auction_agent()
@@ -17,6 +18,7 @@ defmodule NodeListener do
     {:noreply, state}
   end
 
+  #TODO this can be improved to only remove the dead node
   def handle_info({:nodedown, _node, _node_type}, state) do
     set_all_members()
     {:noreply, state}
@@ -40,13 +42,13 @@ defmodule NodeListener do
   #TODO necessary since when the node is up, its AgentReplicator.Supervisor may have not started yet
   #TODO maybe delegatin in another actor that retries?
   def sync_auction_agent do
-    Process.sleep(2000)
+    Process.sleep(1000)
     Node.list()
       |> Enum.each(fn node -> sync_agent_with_node(node) end)
   end
 
   def sync_idGenerator_agent do
-    Process.sleep(2000)
+    Process.sleep(1000)
     Node.list()
       |> Enum.each(fn node -> sync_idGenerator_with_node(node) end)
   end

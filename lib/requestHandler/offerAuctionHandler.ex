@@ -11,6 +11,7 @@ defmodule OfferAuctionHandler do
   end
 
   #TODO should die after this call!
+  #to do that, use Task.Supervisor.async (since the normal Supervisor cannot await 'em)
   def handle_call({:create, conn, id}, _sender, state) do
     auction = GenServer.call(AuctionHome, {:auction_by_id, id})
     offerJson = conn.body_params
