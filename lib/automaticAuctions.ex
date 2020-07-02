@@ -2,8 +2,7 @@ defmodule AutomaticAuctions do
   use Application
 
   def start(_type, _args) do
-    port = System.argv()
-      |> List.first
+    port = System.get_env("PORT")
     if !port do
       IO.inspect "Please specify port after the filename"
       Process.exit(self(), :normal)
