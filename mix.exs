@@ -15,7 +15,7 @@ defmodule AutomaticAuctions.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison, :plug_cowboy, :poison, :secure_random, :singleton],
+    [applications: [:logger, :httpoison, :plug_cowboy, :poison, :secure_random, :singleton, :libcluster, :horde, :singleton],
      mod: {AutomaticAuctions, []}]
   end
 
