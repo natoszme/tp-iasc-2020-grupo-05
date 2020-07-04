@@ -1,3 +1,9 @@
+## Levantar la aplicación
+`PORT=9001 iex --sname test -S mix run lib/automaticAuctions.ex`
+
+## Levantar una imagen de Docker con la aplicación
+`make run PORT=9001`
+
 # Subastas Automáticas
 ## TP Grupal - IASC 1C2020
 
@@ -37,7 +43,11 @@ En esta primera no se tendrán en cuenta cuestiones de seguridad; se asumirá qu
 Se podrá utilizar cualquier tecnología que aplique alguno de los siguientes conceptos vistos en la cursada:
 * Paso de mensajes basado en actores
 * Continuaciones explícitas (CPS)
-* Promises
+* Promises## Levantar la aplicación
+`PORT=9001 iex --sname test -S mix run lib/automaticAuctions.ex`
+
+## Levantar una imagen de Docker con la aplicación
+`make run PORT=9002`
 * Memoria transaccional
 * Corrutinas
 
