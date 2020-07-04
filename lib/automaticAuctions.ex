@@ -4,7 +4,7 @@ defmodule AutomaticAuctions do
   def start(_type, _args) do
     port = System.get_env("PORT")
     if !port do
-      IO.inspect "Please specify port after the filename"
+      IO.inspect "Env var PORT isn't set"
       Process.exit(self(), :normal)
     end
 

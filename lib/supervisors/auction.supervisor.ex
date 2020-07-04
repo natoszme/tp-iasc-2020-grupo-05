@@ -12,18 +12,13 @@ defmodule Auction.Supervisor do
 
   #TODO muy acopaldo a la auction? porque necesitamos calcular estos valores la sólo primera vez
   def createAuction(auctionJson) do
-    endTime = DateTime.add(DateTime.utc_now(), String.to_integer(auctionJson.timeout), :second)
-    auctionJson = Map.put(auctionJson, :endTime, endTime) |> Map.delete(:timeout)
-    id = GenServer.call({:global, IdGenerator}, :next)
-    auctionJson = Map.put(auctionJson, :id, id)
-    auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
-    auctionJson = Map.put(auctionJson, :originalNode, Node.self)
-    {:ok, auction} = Horde.DynamicSupervisor.start_child(Auction.Supervisor, {Auction, auctionJson})
+    intialState = Auction.initialState(auctionJson)
+    {:ok, auction} = Horde.DynamicSupervisor.start_child(Auction.Supervisor, {Auction, intialState})
     #this won't work when distributed since its only for local pids
     #Process.send_after(auction, :die, 2000)
-    IO.inspect "created auction on #{Node.self}"
+    IO.inspect "created auction from node #{Node.self}"
     IO.inspect auction
-    {auction, id}
+    {auction, intialState.id}
   end
 
   defp get_members() do

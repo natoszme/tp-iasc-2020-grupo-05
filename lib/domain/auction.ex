@@ -5,6 +5,16 @@ defmodule Auction do
     GenServer.start_link(__MODULE__, state)
   end
 
+  def initialState(auctionJson) do
+    id = GenServer.call({:global, IdGenerator}, :next)
+    endTime = DateTime.add(DateTime.utc_now(), String.to_integer(auctionJson.timeout), :second)
+    auctionJson = Map.put(auctionJson, :id, id)
+    auctionJson = Map.put(auctionJson, :endTime, endTime)
+      |> Map.delete(:timeout)
+    auctionJson = %{auctionJson | basePrice: String.to_integer(auctionJson.basePrice)}
+    Map.put(auctionJson, :originalNode, Node.self)
+  end
+
   def init(state) do
     Horde.Registry.register(Auction.Registry, state.id, {})
     state = addTimeIfNeeded(state)
