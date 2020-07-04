@@ -6,7 +6,8 @@ defmodule Auction do
   end
 
   def init(state) do
-    Registry.register(AuctionRegistry, state.id, {})
+    Horde.Registry.register(Auction.Registry, state.id, {})
+    state = addTimeIfNeeded(state)
     Process.send_after(self(), :timeout, timeToTimeout(state))
 
     state = case Auction.Agent.bestOffer(state.id) do
@@ -20,7 +21,7 @@ defmodule Auction do
   end
 
   def terminate(:normal, %{id: id}) do
-    Auction.Agent.removeAuction(id)
+    IO.inspect "auction #{id} ended"
   end
 
   def terminate({:bad_return_value, {:stop, :dead}}, _state) do
@@ -94,7 +95,7 @@ defmodule Auction do
   end
 
   def updateOffer(%{id: id}, actualPrice, token) do
-    Auction.Agent.saveOffer(id, _offer(token, actualPrice))
+    Auction.Agent.saveAndSyncOffer(id, _offer(token, actualPrice))
   end
 
   def stateWithUpdatedPrice(state, actualPrice, token) do
@@ -150,5 +151,14 @@ defmodule Auction do
   def notifyBuyer(%{id: id}, buyer, message, price \\ nil) do
     notificationValue = if price, do: {id, price}, else: id
     GenServer.cast(buyer, {message, notificationValue})
+  end
+
+  def addTimeIfNeeded(state) do
+    %{originalNode: originalNode, endTime: endTime} = state
+    case originalNode != Node.self do
+      true -> %{state | endTime: DateTime.add(endTime, 5)}
+      _ -> state
+    end
+
   end
 end

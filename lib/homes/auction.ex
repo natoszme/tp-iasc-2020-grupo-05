@@ -6,12 +6,12 @@ defmodule AuctionHome do
   end
 
   def init(state) do
-    Registry.start_link(keys: :unique, name: AuctionRegistry)
+    AuctionRegistry.start()
     {:ok, state}
   end
 
   def handle_call({:auction_by_id, id}, _sender, state) do
-    auctionRegister = Registry.lookup(AuctionRegistry, String.to_integer(id)) |> List.first
+    auctionRegister = AuctionRegistry.auctionById(id)
     result = case auctionRegister do
       {auction, _} -> auction
       _ -> :none

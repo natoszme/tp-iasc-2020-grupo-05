@@ -12,7 +12,7 @@ defmodule AutomaticAuctions.Supervisor do
 
   def children(port) do
     [ httpRouter(port), clusterDefinition(), RequestHandler.Supervisor, Auction.Supervisor, Buyer.Supervisor,
-      IdGenerator, Auction.Agent, Home.Supervisor ]
+      IdGenerator.Agent, IdGenerator, Auction.Agent, Home.Supervisor, taskSupervisor(), NodeListener ]
   end
 
   def httpRouter(port) do
@@ -29,5 +29,9 @@ defmodule AutomaticAuctions.Supervisor do
     ]
 
     {Cluster.Supervisor, [topologies, [name: AutomaticAuctions.Cluster.Supervisor]]}
+  end
+
+  def taskSupervisor do
+    {Task.Supervisor, name: AgentReplicator.Supervisor}
   end
 end

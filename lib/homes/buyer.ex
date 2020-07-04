@@ -6,7 +6,7 @@ defmodule BuyerHome do
   end
 
   def init(state) do
-    Registry.start_link(keys: :unique, name: BuyerRegistry)
+    BuyerRegistry.start()
     {:ok, state}
   end
 
@@ -18,7 +18,7 @@ defmodule BuyerHome do
   end
 
   def handle_call({:by_token, token}, _sender, state) do
-    buyerRegister = Registry.lookup(BuyerRegistry, token) |> List.first
+    buyerRegister = BuyerRegistry.buyerByToken(token)
     result = case buyerRegister do
       {buyer, _} -> buyer
       _ -> :none
@@ -31,8 +31,10 @@ defmodule BuyerHome do
     GenServer.call(__MODULE__, {:create, buyerJson})
   end
 
+  #TODO use BuyerRegistry
+  #TODO may look for interested saving the interested tags in the value and the Registry.match/4
   def interestedIn(tags) do
-    childs = DynamicSupervisor.which_children(Buyer.Supervisor)
+    childs = Horde.DynamicSupervisor.which_children(Buyer.Supervisor)
     Enum.filter(childs, &(_childInterestedIn?(&1, tags)))
       |> Enum.map(&(elem(&1, 1)))
   end
