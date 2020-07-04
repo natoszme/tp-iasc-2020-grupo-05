@@ -10,7 +10,6 @@ defmodule Auction.Supervisor do
     {:ok, Keyword.put(options, :members, get_members())}
   end
 
-  #TODO muy acopaldo a la auction? porque necesitamos calcular estos valores la sólo primera vez
   def createAuction(auctionJson) do
     intialState = Auction.initialState(auctionJson)
     {:ok, auction} = Horde.DynamicSupervisor.start_child(Auction.Supervisor, {Auction, intialState})

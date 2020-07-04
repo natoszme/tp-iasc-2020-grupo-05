@@ -1,4 +1,4 @@
-#TODO should be an agent
+#TODO should be an agent?
 defmodule IdGenerator do
   use GenServer
 

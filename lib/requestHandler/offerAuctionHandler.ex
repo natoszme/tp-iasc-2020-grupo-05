@@ -1,8 +1,8 @@
 defmodule OfferAuctionHandler do
-  use GenServer, restart: :transient
+  use Task, restart: :transient
 
-  def start_link(state) do
-    GenServer.start_link(__MODULE__, state)
+  def start_link(_args) do
+    Task.start_link(__MODULE__)
   end
 
   #TODO retry on failing, doing the call on init?
@@ -10,38 +10,31 @@ defmodule OfferAuctionHandler do
     {:ok, state}
   end
 
-  #TODO should die after this call!
-  #to do that, use Task.Supervisor.async (since the normal Supervisor cannot await 'em)
-  def handle_call({:create, conn, id}, _sender, state) do
+  def create({conn, id}) do
     auction = GenServer.call(AuctionHome, {:auction_by_id, id})
     offerJson = conn.body_params
 
     #TODO esto se puede mejorar?
-    reply = case auction do
+    case auction do
       :none ->
         {:error, "inexisting auction ##{id}"}
       pid ->
         createOffer(conn, pid, offerJson)
     end
-
-    {:reply, reply, state}
   end
 
-  #TODO should die after this call!
   #TODO avoid logic repeating
-  def handle_call({:cancel, id}, _sender, state) do
+  def cancel(id) do
     auction = GenServer.call(AuctionHome, {:auction_by_id, id})
 
     #TODO esto se puede mejorar?
-    reply = case auction do
+    case auction do
       :none ->
         :error
       pid ->
         cancelAuction(pid)
         :ok
     end
-
-    {:reply, reply, state}
   end
 
   #TODO mejorar esto (parametros)
