@@ -1,6 +1,9 @@
 ## Levantar la aplicación
 `PORT=9001 iex --sname test -S mix run lib/automaticAuctions.ex`
 
+## Tests (sin Docker)
+`PORT=9001 iex --sname test -S mix test test/`
+
 ## Levantar una imagen de Docker con la aplicación
 `make run PORT=9001`
 
