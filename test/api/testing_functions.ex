@@ -12,7 +12,11 @@ defmodule TestingFunctions do
         build_and_get_response("/bids", auction_data)
     end
 
-    def new_offer_on_auction(auction, token, new_price) do # auction and token are strings, new_price is a map with a key :price
-         build_and_get_response("/bids/#{auction}/offer?token=#{token}", new_price)
+    def new_offer_on_auction(auction_id, buyer_token, new_price) do # auction_id and buyer_token are strings, new_price is a map with a key :price
+        build_and_get_response("/bids/#{auction_id}/offer?token=#{buyer_token}", new_price)
+    end
+
+    def cancel_auction(auction_id) do # auction_id must be a string id
+        build_and_get_response("/bids/#{auction_id}/cancel", %{})
     end
 end

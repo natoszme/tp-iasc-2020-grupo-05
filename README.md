@@ -2,7 +2,7 @@
 `PORT=9001 iex --sname test -S mix run lib/automaticAuctions.ex`
 
 ## Tests (sin Docker)
-`PORT=9001 iex --sname test -S mix test`. Para correr un test en específico, correr `PORT=9001 iex --sname test -S mix test path_to_test.exs`
+`PORT=9001 iex --sname test -S mix test`. Para correr un test en específico, correr `PORT=9001 iex --sname test -S mix test path_to_test.exs`; por ejemplo, se podría correr `PORT=9001 iex --sname test -S mix test test/api/scenario_3_test.exs`.
 
 ## Levantar una imagen de Docker con la aplicación
 `make run PORT=9001`
