@@ -4,5 +4,5 @@ services:
         build: .
         user: "node"
         ports:
-            - "127.0.0.1:12701-12706:12701"
+            - "127.0.0.1:12701-12707:12701"
         command: "node buyer_server.js"

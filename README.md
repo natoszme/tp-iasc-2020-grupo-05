@@ -7,7 +7,7 @@ Para correr un test en específico, correr `PORT=9001 iex --sname test -S mix te
 Los buyers de los tests escuchan sobre `127.0.0.1` (localhost), con puertos comenzando en `12701` y ascendiendo. No es necesario levantarlos para que los tests den bien.
 
 ## Levantar clientes que escuchen requests
-En la carpeta `/test/buyers_servers_external`, ejecutar `docker-compose up --build --scale buyer=6` levantará 6 buyers en el rango de puertos `12701-12706`. El número 6 se debe a que por ahora existen 6 compradores en total (según los tests), y como docker-compose usando rangos elige sobre dicho rango al azar, usar la cantidad necesaria de puertos asegura que todos estén ocupados. Dichas instancias levantadas solo escuchan requests y las imprimen por consola, permitiendo monitorear las notificaciones que lleguen a cada una.
+En la carpeta `/test/buyers_servers_external`, ejecutar `docker-compose up --build --scale buyer=7` levantará 7 buyers en el rango de puertos `12701-12707`. El número 7 se debe a que por ahora existen 7 compradores en total (según los tests), y como docker-compose usando rangos elige sobre dicho rango al azar, usar la cantidad necesaria de puertos asegura que todos estén ocupados. Dichas instancias levantadas solo escuchan requests y las imprimen por consola, permitiendo monitorear las notificaciones que lleguen a cada una. Estaría bueno generalizar más esto, puede que un config + algún loop hecho con [jsonnet](https://github.com/google/jsonnet) lo haga, pero lo veo overkill por ahora.
 
 Nota: si se quisiera levantar n buyers, se debería cambiar el `docker-compose.yml` a un límite de `12700 + n` y ejecutar con el flag `scale buyer=n`.
 
