@@ -2,5 +2,4 @@
 ExUnit.configure seed: 0
 ExUnit.start()
 
-{:ok, bucket} = KV.Bucket.start_link([])
-bucket
+KV.Bucket.start_link([])
