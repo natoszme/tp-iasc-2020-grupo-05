@@ -10,14 +10,14 @@ defmodule Scenario2Tests do
   end
 
     test "creating buyer C returns OK + token", %{bucket: bucket} do
-      andy = %{name: "andy", ip: "127.0.0.3", tags: ["films", "movies"]}
+      andy = %{name: "andy", ip: "127.0.0.1:12703", tags: ["films", "movies"]}
       conn = new_buyer(andy)
       KV.Bucket.put(bucket, "token_c", Poison.Parser.parse(conn.resp_body) |> elem(1) |> Map.get("token")) # for future use
       assert conn.status == 200
     end
 
     test "another buyer D comes into play, created OK. Token of length 32 provided", %{bucket: bucket} do
-      pipo = %{name: "pipo", ip: "127.0.0.4", tags: ["football"]}
+      pipo = %{name: "pipo", ip: "127.0.0.1:12704", tags: ["football"]}
       conn = new_buyer(pipo)
       KV.Bucket.put(bucket, "token_d", Poison.Parser.parse(conn.resp_body) |> elem(1) |> Map.get("token")) # for future use
       assert conn.status == 200
