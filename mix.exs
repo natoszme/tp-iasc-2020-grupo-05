@@ -7,6 +7,7 @@ defmodule AutomaticAuctions.Mixfile do
      elixir: "~> 1.10",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     elixirc_paths: ["lib", "test"],
      deps: deps(),
    ]
   end
