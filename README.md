@@ -14,6 +14,9 @@ Nota: si se quisiera levantar n buyers, se debería cambiar el `docker-compose.y
 ## Levantar una imagen de Docker con la aplicación
 `make run PORT=9001`
 
+## Decisiones de diseño
+[Documento de arquitectura](https://docs.google.com/document/d/1FaC315koIwCNZuUz9QPCQPTjRTNxZpJH90dUsDZYZ7Q/edit?usp=sharing)
+
 # Subastas Automáticas
 ## TP Grupal - IASC 1C2020
 
